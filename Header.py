@@ -8,10 +8,14 @@ class SparseStatus(Enum):
     NORMAL = 0
     SPORADIC = 1
 
+
+
 class DensityStatus(Enum):
     SPARSE = 0
     TRANSITIONAL = 1
     DENSE = 2
+
+
 
 
 #原始数据，三维向量

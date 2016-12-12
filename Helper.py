@@ -1,11 +1,46 @@
+import math
+from Header import *
 #一个工具类
+
+
 class Helper:
+    N = 2000 * 300 * 720  # 根据三个维度的值域得到
+    Cl = 0.8  # 这个是聚类参数里的常数，取值范围0~1，作者选了0.8，在这里仿照一下，后期在调整
+    Cm = 111456000  # 这个是聚类参数里的常数，取值范围>1 根据《参数密度调查得出》
+    lamb = 0.998  # λ是聚类参数里的常数，取值范围0~1
+
+    Dm = Cm/N*(1-lamb)
+    Dl = Cl/N*(1-lamb)
+    #===============实现单例==================
+    def __new__(cls, *args, **kw):
+        if not hasattr(cls, '_instance'):
+            orig = super(Helper, cls)
+            cls._instance = orig.__new__(cls, *args, **kw)
+        return cls._instance
+
+
+    #==========获得gap=================
+    def gap(self):
+        math.floor(math.log(max(self.Cl / self.Cm, (self.N - self.Cm) / (self.N - self.Cl)), self.lamb))
+
+    def getDensityStatus(self,density_value):
+        ret = None
+        if self.__densityStatus >= Helper().Dm:
+            return DensityStatus.DENSE
+        elif self.__densityStatus <= Helper().Dl:
+            return DensityStatus.SPARSE
+        else:
+            # 注意：paper里说这个应该是闭区间，但是我觉得开区间比较准确
+            return DensityStatus.TRANSITIONAL
+
+
+
     @staticmethod
         #根据原始数据得出它所属grid的key值
     def getKeyFromRawData(rawData):
-        # PW：0.1~200 精度选0.1
-        #RF：1~15 精度选0.05
-        # DOA方向角0~360，精度0.5
+        # PW：0.1~200 精度选0.1(值域0~2000)
+        #RF：1~15 精度选0.05（至于0-300）
+        # DOA方向角0~360，精度0.5（值域0-720）
         pw = rawData.PW
         rf = rawData.RF
         doa=rawData.DOA
@@ -33,7 +68,5 @@ class Helper:
             index+=1
         return ret
 
-    def getN():
-        return 2000300720
 
 
