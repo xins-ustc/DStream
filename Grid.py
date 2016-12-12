@@ -9,7 +9,7 @@ class Grid:
     #the grid density at the last update
     __density=0
     #the class label of the grid
-    __cluster_key=0
+    __cluster_key=-1
     #densityStatus:dense/sparse/transitional
     __densityStatus=DensityStatus.SPARSE
     #sparse的子状态，当用以标记SPORADIC，和NORMAL,默认是NORMAL
@@ -48,6 +48,23 @@ class Grid:
             self.__change=1
             self.__densityStatus=Helper().getDensityStatus()
 
+        #TODO:若处于SPRODICED,更改为SPRORADIC
+
+    #清空数据
+    def clear(self):
+        self.__cluster_key=-1
+        self.__density=0
+        self.__change=0
+        self.__densityStatus=DensityStatus.SPARSE
+        self.__sparseStatus=SparseStatus.NORMAL
+        self.__time_remove=0
+        self.__time_update=0
+
+    def setRemoveTime(self,time):
+        self.__time_remove=time
+
+    def resetChangeFlag(self,value):
+        self.__change=0
 
 
 

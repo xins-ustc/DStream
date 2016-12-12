@@ -21,3 +21,5 @@ class ClusterManager:
 
     #切分cluster(只针对已经不是一个整体的cluster),如果cluster依然是一个整体,返回-1
     def splitCluster(self,cluster_key):
+
+

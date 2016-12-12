@@ -64,7 +64,7 @@ class Helper:
         for a in accuracy:
             ret[index]=str(key+accuracy[index])
             index+=1
-            ret[index]=str(key+accuracy[index])
+            ret[index]=str(key-accuracy[index])
             index+=1
         return ret
 

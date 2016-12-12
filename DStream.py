@@ -216,7 +216,7 @@ class D_Stream:
             self.initial_clustring()
         if self.tc%gap==0:
             #判断sporadic的状态并删除符合条件的grid
-            self.grid_list.removeSporadic()
+            self.grid_list.judgeAndremoveSporadic()
             self.adjust_clustring()
         #清空change为0
         self.grid_list.clearChangeFlag()

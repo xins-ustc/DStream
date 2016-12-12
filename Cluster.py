@@ -3,7 +3,7 @@ class Cluster:
     def key(self):
     #TODO:往当前cluster中加入grid
     def addGrid(self,grid_object):
-    #TODO：从cluster中删除grid
+    #TODO：从cluster中删除grid(这个操作不理会grid_list)
     def delGrid(self,grid_object):
     #TODO:判断某grid是否为该cluster的grid
     def isOutsideGrid(self,grid_object):

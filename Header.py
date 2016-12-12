@@ -6,7 +6,8 @@ from enum import Enum
 #Sparse的两个子状态
 class SparseStatus(Enum):
     NORMAL = 0
-    SPORADIC = 1
+    SPORADIC = 1 #刚刚从SPORADIC转变过来的状态,judge过程不删除
+    SPORADICED = 2 #在judge过程若发现SPORADIC
 
 
 
