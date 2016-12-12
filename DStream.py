@@ -198,22 +198,25 @@ class D_Stream:
     def do_DStream(self,rawData):
         self.tc+=1
         #得到key值后，我们将数据点打到相应的grid中，然后更新其信息
-        grid_key=Helper.getKeyFromRawData(rawData)
+        self.grid_list.addNewData(rawData)
+        #grid_key=Helper.getKeyFromRawData(rawData)
         #判断grid_list里面有没有对应key，没有先添加
-        if not self.grid_list.has_key(grid_key):
-            #TODO:1、创建新的C_Vector；
-            # TODO:2、加入grid_list 里；
-        #TODO:更新grid的信息
-        if not 0==self.__refreshGrid(grid_key,rawData):
-            print("key 不存在，__refreshGrid调用失败\n")
+        #if not self.grid_list.has_key(grid_key):
+            #1、创建新的C_Vector；
+            #2、加入grid_list 里；
+        #更新grid的信息
+        #if not 0==self.__refreshGrid(grid_key,rawData):
+           # print("key 不存在，__refreshGrid调用失败\n")
 
         #TODO:首次到达gap
-        if tc==gap:
-            initial_clustring()
-        if tc%gap==0:
-            #TODO:判断sporadic的状态并删除符合条件的grid
-            adjust_clustring
-        #TODO:清空change为0
+        if self.tc==gap:
+            self.initial_clustring()
+        if self.tc%gap==0:
+            #判断sporadic的状态并删除符合条件的grid
+            self.grid_list.removeSporadic()
+            self.adjust_clustring()
+        #清空change为0
+        self.grid_list.clearChangeFlag()
 
 
 

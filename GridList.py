@@ -1,7 +1,13 @@
+import Grid
 #用于管理包含数据的Grid
 class GridList:
     #TODO:返回一个neighborKey数组
     def getNeighborKeys(self,grid_key):
+        #三维空间有6个neighbor
+        retArray=[]
+
+
+
     #TODO:返回这个Grid的所有neighborGrid
     def getNeighborGrids(self,grid_key):
         #注意neighbor就是临近但是cluster不一样或者没有cluster的grid
@@ -16,3 +22,6 @@ class GridList:
 
     #所有change置0
     def clearChangeFlag(self):
+
+    #进入sporadic删除判定逻辑
+    def removeSporadic(self):
