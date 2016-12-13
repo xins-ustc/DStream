@@ -5,9 +5,10 @@ from enum import Enum
 
 #Sparse的两个子状态
 class SparseStatus(Enum):
-    NORMAL = 0
-    SPORADIC = 1 #刚刚从SPORADIC转变过来的状态,judge过程不删除
-    SPORADICED = 2 #在judge过程若发现SPORADIC
+    #paper中只有NORMAL和SPORADIC。这里我们为了代码逻辑的便利做了修改
+    NORMAL = 0 #在judge过程，若符合s1和s2 则转变为TOEDELETE
+    TEMP = 1 #在judge过程，符合s1和s2则转为TODELETE，若不符合s1和s2，变为NORMAL
+    TODELETE = 2 #在judge过程，看到这个状态一律删除（在Grid的AddNewData里若发现这个状态，把它修改为TEMP）
 
 
 
