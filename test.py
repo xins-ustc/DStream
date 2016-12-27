@@ -2,6 +2,7 @@ from enum import Enum
 import math
 from Header import DensityStatus
 from Helper import  *
+import unittest
 
 #这个函数用于输出某个grid被数据点击中时的密度结果，lam是lambda值，num是连续的点数,gap是间隔，如果是连续击中则gap=1
 def denseTest(lam,num,gap):
@@ -17,6 +18,10 @@ def densityThreshold(Cl,lamb,tg,t,N):
 
 
 
-for k in dic:
-    dic.pop(k)
-    print(dic)
+class A:
+    __pri=1
+    c=2
+
+a=A()
+b=a._A__pri
+print(b)

@@ -45,6 +45,7 @@ class Helper:
         pw = rawData.PW
         rf = rawData.RF
         doa=rawData.DOA
+
         #哈希值以三个维度的最大值来排列
         #2000(pw)300(rf)720（doa），故最大值是2000300720。key=（pw/0.1）*1000000+（rf/0.05）*1000+doa/0.5
         return Helper.getKeyFromRawData(pw,rf,doa)
@@ -52,6 +53,12 @@ class Helper:
 
 
     def getKeyFromRawData(pw,rf,doa):
+        if pw >200 or pw<0:
+            raise Exception("Helper.getKeyFromRawData:pw数据超出范围",pw)
+        if rf>15 or rf<0:
+            raise Exception("Helper.getKeyFromRawData:rf数据超出范围",rf)
+        if doa<0 or doa >360:
+            raise Exception("Helper.getKeyFromRawData:doa数据超出范围",doa)
         return str(round((pw/0.1))*1000000+round((rf/0.05))*1000+round(doa/0.5))
 
 

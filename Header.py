@@ -3,6 +3,9 @@ from enum import Enum
 #DensityStatus=Enum('status',('NORMAL','SPORADIC'))
 
 
+
+
+
 #Sparse的两个子状态
 class SparseStatus(Enum):
     #paper中只有NORMAL和SPORADIC。这里我们为了代码逻辑的便利做了修改
@@ -28,7 +31,7 @@ class RawData:
     RF=0
     #脉宽，0.1μs~200μs 测量精度是50ns
     PW=0
-    def __init__(self,DOA,RF,PW):
+    def __init__(self,PW,RF,DOA):
         self.DOA=DOA
         self.RF=RF
         self.PW=PW

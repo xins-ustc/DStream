@@ -1,5 +1,10 @@
 from Header import *
 from Helper import *
+
+from TestHelper import *
+
+import unittest
+
 #Characteristic Vector 保存每个grid的信息
 class Grid:
     #"the last time when g is update" 即grid最近更新的时间点
@@ -17,7 +22,7 @@ class Grid:
     #change.用来标记DensityStatus是否有过修改
     __change=0
 
-    __key=0
+    __key=-1
     def key(self):
         return self.__key
 
@@ -73,8 +78,13 @@ class Grid:
 
     #每调用一次这个函数认为当前grid来了一个新数据点
     def addData(self,rawData,time):
-        #设置key
-        self.__key=Helper().getKeyFromRawData(rawData)
+        # grid是初始化时key值是-1，若收个rawData加进来后，它的key值便以这个值为基准，后续的rawData若不符合这个key，认为是误操作
+        if -1==self.__key:
+            #设置key
+            self.__key=Helper().getKeyFromRawData(rawData)
+        else:
+            if not self.__key==Helper.getKeyFromRawData(rawData):
+                raise ValueError("Grid.addData:rawData没有加到正确的Grid中")
 
 
         #更新密度 D(g,tn)=λ**(tn-tl)*D(g,tl)+1 其中tn是当前时间，tl是前一个更新时间
@@ -87,6 +97,8 @@ class Grid:
         #若处于TODELETE状态，转为TEMP
         if SparseStatus.TODELETE==self.__sparseStatus:
             self.__sparseStatus=SparseStatus.TEMP
+
+        self.__time_update=time
 
     #清空数据
     def clear(self):
