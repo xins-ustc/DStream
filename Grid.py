@@ -22,18 +22,20 @@ class Grid:
     #change.用来标记DensityStatus是否有过修改
     __change=0
 
-    __key=-1
+    __key=0
+    #tested
     def key(self):
         return self.__key
 
     def time_remove(self):
         return self.__time_remove
 
+
     def isNoCluster(self):
         if -1==self.__cluster_key:
             return True
         return False
-
+    #test
     def setClusterKey(self,key):
         self.__cluster_key=key
 
@@ -57,6 +59,7 @@ class Grid:
     def sparseStatus(self):
         return self.__sparseStatus
 
+    #test
     def densityStatus(self):
         return self.__densityStatus
         #!!!!!!!!!!!!!!!!!!!考虑可以直接返回成员变量，因为每次addData都会更新这个值!!!!!!!
@@ -69,22 +72,17 @@ class Grid:
         else:
             #注意：paper里说这个应该是闭区间，但是我觉得开区间比较准确
             return DensityStatus.TRANSITIONAL
-
-    def clusterKey(self):
+    #test
+    def clusterKey(self):#test
         return self.__cluster_key
 
     def densityThreshold(self):
         return
 
     #每调用一次这个函数认为当前grid来了一个新数据点
-    def addData(self,rawData,time):
-        # grid是初始化时key值是-1，若收个rawData加进来后，它的key值便以这个值为基准，后续的rawData若不符合这个key，认为是误操作
-        if -1==self.__key:
-            #设置key
-            self.__key=Helper().getKeyFromRawData(rawData)
-        else:
-            if not self.__key==Helper.getKeyFromRawData(rawData):
-                raise ValueError("Grid.addData:rawData没有加到正确的Grid中")
+    def addData(self,rawData,time):#test
+        #设置key
+        self.__key=Helper().getKeyFromRawData(rawData)
 
 
         #更新密度 D(g,tn)=λ**(tn-tl)*D(g,tl)+1 其中tn是当前时间，tl是前一个更新时间
@@ -98,9 +96,11 @@ class Grid:
         if SparseStatus.TODELETE==self.__sparseStatus:
             self.__sparseStatus=SparseStatus.TEMP
 
+        #更改更新时间
         self.__time_update=time
 
     #清空数据
+    #test
     def clear(self):
         self.__cluster_key=-1
         self.__density=0
@@ -115,7 +115,4 @@ class Grid:
 
     def resetChangeFlag(self,value):
         self.__change=0
-
-
-
 

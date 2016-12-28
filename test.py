@@ -16,6 +16,13 @@ def denseTest(lam,num,gap):
 def densityThreshold(Cl,lamb,tg,t,N):
     return (Cl*(1-(lamb**(t-tg+1))))/N*(1-lamb)
 
+def fun1():
+    raise Exception("hehe")
+
+class Testtest(unittest.TestCase):
+    def test_raise(self):
+        with self.assertRaises(ValueError):
+            fun1()
 
 
 class A:
@@ -23,5 +30,5 @@ class A:
     c=2
 
 a=A()
-b=a._A__pri
+b=a.__getattribute__("c")
 print(b)
