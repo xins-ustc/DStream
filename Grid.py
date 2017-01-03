@@ -26,11 +26,11 @@ class Grid:
     #tested
     def key(self):
         return self.__key
-
+    #test
     def time_remove(self):
         return self.__time_remove
 
-
+    #test
     def isNoCluster(self):
         if -1==self.__cluster_key:
             return True
@@ -41,21 +41,24 @@ class Grid:
 
     #这个值有些诡异，从测试来看，它永远是一个1e-10 左右的数。从测试来看，这个指标是用来衡量grid在两个新数据点之间时间间隔的度量，但是这个度量
     #也太离谱了吧？
-    def densityThreshold(time):
-        return (Helper().Cl * (1 - (Helper().lamb ** (time - self.__time_update + 1)))) / Helper().N * (1 - Helper().lamb)
-
+    #test
+    def densityThreshold(self,time):
+        return (Helper().Cl * (1 - (Helper().lamb ** (time - self.__time_update + 1)))) / (Helper().N * (1 - Helper().lamb))
+    #test
     def setSparseStatus(self,status):
         self.__sparseStatus=status
-
+    #test
     def density(self):
         return self.__density
 
     #根据时间来得到当前grid的density
-    def density(self,current_time):
+    #test
+    def densityWithTime(self,current_time):
         #根据公式是1+（last_density*lamb**(current_time-time_update)
         #又这个公式的证明过程和意义可知，当前时间的密度是lamb**(current_time-time_update)*last_density
         return self.__density*(Helper().lamb**(current_time-self.__time_update))
 
+    #test
     def sparseStatus(self):
         return self.__sparseStatus
 
@@ -76,13 +79,15 @@ class Grid:
     def clusterKey(self):#test
         return self.__cluster_key
 
-    def densityThreshold(self):
-        return
 
     #每调用一次这个函数认为当前grid来了一个新数据点
-    def addData(self,rawData,time):#test
+    # test
+    def addData(self,rawData,time):
+        if not 0==self.__key:
+            if not Helper.getKeyFromRawData(rawData)==self.__key:
+                raise ValueError
         #设置key
-        self.__key=Helper().getKeyFromRawData(rawData)
+        self.__key=Helper.getKeyFromRawData(rawData)
 
 
         #更新密度 D(g,tn)=λ**(tn-tl)*D(g,tl)+1 其中tn是当前时间，tl是前一个更新时间
@@ -110,9 +115,10 @@ class Grid:
         self.__time_remove=0
         self.__time_update=0
 
+    #test
     def setRemoveTime(self,time):
         self.__time_remove=time
-
-    def resetChangeFlag(self,value):
+    #test
+    def resetChangeFlag(self):
         self.__change=0
 

@@ -11,7 +11,7 @@ class TestGrid(unittest.TestCase):
             rawData = TestHelper.randomLegalRawData()
             right_key = Helper().getKeyFromRawData(rawData)
             g = Grid()
-            g.addData(rawData, random)
+            g.addData(rawData, random.randint(1,10000))
             totest_key =g.key()
             self.assertEqual(right_key,totest_key)
     def test_cluster(self):
@@ -29,7 +29,7 @@ class TestGrid(unittest.TestCase):
         g.setRemoveTime(t)
         self.assertEqual(t,g.time_remove())
 
-    def test_densityThreshold(self):
+
 
     def test_SparseStatus(self):
         g=Grid()
@@ -40,8 +40,7 @@ class TestGrid(unittest.TestCase):
         g.setSparseStatus(SparseStatus.NORMAL)
         self.assertEqual(g.sparseStatus(),SparseStatus.NORMAL)
 
-    def test_densityStatus(self):
-        #TODO：测试
+
 
     #检查grid经过addData后，key值是否正确
     def test_addData_key(self):
@@ -52,7 +51,7 @@ class TestGrid(unittest.TestCase):
         correct_key=Helper.getKeyFromRawData(rawData)
         g.addData(rawData,1)
         self.assertEqual(correct_key,g.key())
-        self.assertEqual(1,g._Grid_time_update)
+        self.assertEqual(1,g._Grid__time_update)
 
     def test_addData_wrongKey(self):
         g=Grid()
@@ -68,10 +67,10 @@ class TestGrid(unittest.TestCase):
         g = Grid()
         t=1
         rawData=TestHelper.randomLegalRawData()
-        for 1 in range(1,50):
+        for i in range(1,50):
             t+=random.randint(1,500)
             g.addData(rawData,t)
-            self.assertEqual(g._Grid_time_update,t)
+            self.assertEqual(g._Grid__time_update,t)
 
     #检查densityStatus的get方法是否正确
     def test_densityStatus(self):
@@ -94,10 +93,10 @@ class TestGrid(unittest.TestCase):
         g._Grid__densityStatus=DensityStatus.SPARSE
         g._Grid__density=Helper().Dm+100
         g._Grid__time_update=1 #上次更新时间和当前时间相同，保证density不会太多的改变，更利于测试
-        self.assertEqual(self)
+        self.assertEqual(g.density(),Helper().Dm+100)
         g.addData(rawData,1)
         self.assertEqual(g._Grid__change,1)
-        self.assertEqual(DensityStatus.DENSE,g.density())
+        self.assertEqual(DensityStatus.DENSE,g.densityStatus())
 
         #测试Sparse
         g._Grid__change=0
@@ -105,14 +104,19 @@ class TestGrid(unittest.TestCase):
         g._Grid__density=Helper.Dl-100
         g.addData(rawData, 1)
         self.assertEqual(g._Grid__change,1)
-        self.assertEqual(DensityStatus.SPARSE, g.density())
+        self.assertEqual(DensityStatus.SPARSE, g.densityStatus())
 
 
         #测试Transitinal
         g._Grid__change = 0
         g._Grid__densityStatus = DensityStatus.DENSE
-        g._Grid__density = Helper.Dl+(Helper.Dl+Helper.Dm)/2
+        g._Grid__density = Helper().Dl+(Helper().Dl+Helper().Dm)/2
+        self.assertGreater(g.density(),Helper().Dl)
+        self.assertLess(g.density(),Helper().Dm)
+
+
         g.addData(rawData,1)
+
         self.assertEqual(g._Grid__change,1)
         self.assertEqual(DensityStatus.TRANSITIONAL,g.densityStatus())
 
@@ -149,19 +153,46 @@ class TestGrid(unittest.TestCase):
         g.clear()
 
         self.assertEqual(g._Grid__cluster_key,-1)
-        self.assertEqual(g._Grid__cluster_key,0)
+        self.assertEqual(g._Grid__key,0)
         self.assertEqual(g._Grid__change, 0)
         self.assertEqual(g._Grid__time_remove,0)
         self.assertEqual(g._Grid__time_update,0)
         self.assertEqual(g._Grid__densityStatus,DensityStatus.SPARSE)
         self.assertEqual(g._Grid__sparseStatus,SparseStatus.NORMAL)
 
+    def test_densityThreshold(self):
+        last_time = random.randint(1, 10000)
+        cur_time=last_time+random.randint(1,10000)
+
+        value=Helper().Cl*(1-Helper().lamb**(cur_time-last_time+1))/(Helper().N*(1-Helper().lamb))
+        g=Grid()
+        g._Grid__time_update=last_time
+
+        self.assertEqual(value,g.densityThreshold(cur_time))
+
+    def test_resetChangeFlag(self):
+        g=Grid()
+        g._Grid__change=1
+        g.resetChangeFlag()
+        self.assertEqual(0,g._Grid__change)
 
 
+    def test_density(self):
+        g=Grid()
+        a=random.randint(1, 500)
+        g._Grid__density=a
+        self.assertEqual(a,g.density())
+        self.assertGreater(g.density(),0)
 
 
+    def test_densityWithTime(self):
+        g=Grid()
+        g._Grid__time_update=2
+        value=g._Grid__density*(Helper().lamb**(5-2))
+        self.assertEqual(value,g.densityWithTime(5))
 
-
+if __name__ =="__main__":
+    unittest.main()
 
 
 

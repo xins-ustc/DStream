@@ -10,8 +10,8 @@ class Helper:
     lamb = 0.998  # λ是聚类参数里的常数，取值范围0~1
     beta = 0.3 #paper中解释是用于sporadic判断的度量，
 
-    Dm = Cm/N*(1-lamb)
-    Dl = Cl/N*(1-lamb)
+    Dm = Cm/(N*(1-lamb))
+    Dl = Cl/(N*(1-lamb))
     #===============实现单例==================
     def __new__(cls, *args, **kw):
         if not hasattr(cls, '_instance'):
@@ -26,9 +26,9 @@ class Helper:
 
     def getDensityStatus(self,density_value):
         ret = None
-        if self.__densityStatus >= Helper().Dm:
+        if density_value >= Helper().Dm:
             return DensityStatus.DENSE
-        elif self.__densityStatus <= Helper().Dl:
+        elif density_value<= Helper().Dl:
             return DensityStatus.SPARSE
         else:
             # 注意：paper里说这个应该是闭区间，但是我觉得开区间比较准确
@@ -48,11 +48,11 @@ class Helper:
 
         #哈希值以三个维度的最大值来排列
         #2000(pw)300(rf)720（doa），故最大值是2000300720。key=（pw/0.1）*1000000+（rf/0.05）*1000+doa/0.5
-        return Helper.getKeyFromRawData(pw,rf,doa)
+        return Helper.getKey(pw,rf,doa)
         #return str(round((pw/0.1))*1000000+round((rf/0.05))*1000+round(doa/0.5))
 
 
-    def getKeyFromRawData(pw,rf,doa):
+    def getKey(pw,rf,doa):
         if pw >200 or pw<0:
             raise Exception("Helper.getKeyFromRawData:pw数据超出范围",pw)
         if rf>15 or rf<0:
