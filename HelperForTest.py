@@ -1,7 +1,7 @@
 from Header import RawData
 import random
 
-class TestHelper:
+class HelperForTest:
     @staticmethod
     def randomLegalRawData():
         pw=random.random()*200

@@ -21,11 +21,7 @@ def fun1():
 
 class Testtest(unittest.TestCase):
     def test_raise(self):
-        with self.assertRaises(ValueError):
-            fun1()
+        with self.assertRaisesRegex(ValueError,'doa'):
+            Helper.getKey(400,7,128)
 
 
-a=1
-while 1:
-    a=a*2
-    print('a:',a)

@@ -54,11 +54,11 @@ class Helper:
 
     def getKey(pw,rf,doa):
         if pw >200 or pw<0:
-            raise Exception("Helper.getKeyFromRawData:pw数据超出范围",pw)
+            raise ValueError("Helper.getKeyFromRawData:pw数据超出范围",pw)
         if rf>15 or rf<0:
-            raise Exception("Helper.getKeyFromRawData:rf数据超出范围",rf)
+            raise ValueError("Helper.getKeyFromRawData:rf数据超出范围",rf)
         if doa<0 or doa >360:
-            raise Exception("Helper.getKeyFromRawData:doa数据超出范围",doa)
+            raise ValueError("Helper.getKeyFromRawData:doa数据超出范围",doa)
         return str(round((pw/0.1))*1000000+round((rf/0.05))*1000+round(doa/0.5))
 
 

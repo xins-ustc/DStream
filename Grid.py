@@ -1,7 +1,7 @@
 from Header import *
 from Helper import *
 
-from TestHelper import *
+from HelperForTest import *
 
 import unittest
 

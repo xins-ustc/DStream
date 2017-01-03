@@ -8,7 +8,7 @@ class TestGrid(unittest.TestCase):
     def test_key(self):
         # TODO:制造100个随机的合法rawData，测key（）函数能否正确返回该key值
         for i in range(1, 100 + 1):
-            rawData = TestHelper.randomLegalRawData()
+            rawData = HelperForTest.randomLegalRawData()
             right_key = Helper().getKeyFromRawData(rawData)
             g = Grid()
             g.addData(rawData, random.randint(1,10000))
@@ -17,7 +17,7 @@ class TestGrid(unittest.TestCase):
     def test_cluster(self):
         #TODO：给他随便设置一个cluster，测试cluster的get和isNoCluster
         g=Grid()
-        rawData = TestHelper.randomLegalRawData()
+        rawData = HelperForTest.randomLegalRawData()
         right_key = Helper().getKeyFromRawData(rawData)
         self.assertTrue(g.isNoCluster())
         g.setClusterKey(right_key)
@@ -47,7 +47,7 @@ class TestGrid(unittest.TestCase):
 
         #TODO：add之后检查key是否正确，检查错误的rawData抛出异常，检查当前更新时间是否正确、想办法测试change，测试TODELETE
         g=Grid()
-        rawData=TestHelper.randomLegalRawData()
+        rawData=HelperForTest.randomLegalRawData()
         correct_key=Helper.getKeyFromRawData(rawData)
         g.addData(rawData,1)
         self.assertEqual(correct_key,g.key())
@@ -55,10 +55,10 @@ class TestGrid(unittest.TestCase):
 
     def test_addData_wrongKey(self):
         g=Grid()
-        rawData=TestHelper.randomLegalRawData()
+        rawData=HelperForTest.randomLegalRawData()
         g.addData(rawData,1)
         #换一个key，测错误的key抛出异常
-        anotherRawData=TestHelper.anotherKeyRawdataFromKey(rawData)
+        anotherRawData=HelperForTest.anotherKeyRawdataFromKey(rawData)
         with self.assertRaises(ValueError):
             g.addData(anotherRawData,2)
 
@@ -66,7 +66,7 @@ class TestGrid(unittest.TestCase):
     def test_addData_timeUpdate(self):
         g = Grid()
         t=1
-        rawData=TestHelper.randomLegalRawData()
+        rawData=HelperForTest.randomLegalRawData()
         for i in range(1,50):
             t+=random.randint(1,500)
             g.addData(rawData,t)
@@ -87,7 +87,7 @@ class TestGrid(unittest.TestCase):
     # 检查addData的逻辑里各个参数的变更
     def test_addData_changeAndDensity(self):
         #测试Dense
-        rawData=TestHelper.randomLegalRawData()
+        rawData=HelperForTest.randomLegalRawData()
         g=Grid()
         g._Grid__change=0
         g._Grid__densityStatus=DensityStatus.SPARSE
