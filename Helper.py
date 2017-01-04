@@ -22,7 +22,7 @@ class Helper:
 
     #==========获得gap=================
     def gap(self):
-        math.floor(math.log(max(self.Cl / self.Cm, (self.N - self.Cm) / (self.N - self.Cl)), self.lamb))
+        return math.floor(math.log(max(self.Cl / self.Cm, (self.N - self.Cm) / (self.N - self.Cl)), self.lamb))
 
     def getDensityStatus(self,density_value):
         ret = None
@@ -68,12 +68,9 @@ class Helper:
         accuracy=[1000000,1000,1]
 
         #根据neighbor的定义，3个维度分别加减1即可得到对应的neighbor的key
-        index=0
         for a in accuracy:
-            ret[index]=str(key+accuracy[index])
-            index+=1
-            ret[index]=str(key-accuracy[index])
-            index+=1
+            ret.append(str(key+a))
+            ret.append(str(key-a))
         return ret
 
 
