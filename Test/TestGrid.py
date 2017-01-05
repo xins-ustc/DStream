@@ -40,6 +40,13 @@ class TestGrid(unittest.TestCase):
         g.setSparseStatus(SparseStatus.NORMAL)
         self.assertEqual(g.sparseStatus(),SparseStatus.NORMAL)
 
+    def test_addData_time(self):
+        #检查addData后若time小于之前的更新时间，是否会抛出异常
+        g=Grid()
+        g._Grid__time_update=1000
+        with self.assertRaisesRegex(ValueError,"time_update"):
+            raw=HelperForTest.randomLegalRawData()
+            g.addData(raw,500)
 
 
     #检查grid经过addData后，key值是否正确
@@ -71,6 +78,9 @@ class TestGrid(unittest.TestCase):
             t+=random.randint(1,500)
             g.addData(rawData,t)
             self.assertEqual(g._Grid__time_update,t)
+
+
+
 
     #检查densityStatus的get方法是否正确
     def test_densityStatus(self):

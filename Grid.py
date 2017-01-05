@@ -21,8 +21,9 @@ class Grid:
     __sparseStatus=SparseStatus.NORMAL
     #change.用来标记DensityStatus是否有过修改
     __change=0
-
     __key=0
+
+
     #tested
     def key(self):
         return self.__key
@@ -83,6 +84,9 @@ class Grid:
     #每调用一次这个函数认为当前grid来了一个新数据点
     # test
     def addData(self,rawData,time):
+        if time<=self.__time_update:
+            raise ValueError("addData:time cannot less then time_update")
+
         if not 0==self.__key:
             if not Helper.getKeyFromRawData(rawData)==self.__key:
                 raise ValueError

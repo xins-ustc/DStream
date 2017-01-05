@@ -25,8 +25,13 @@ class Testtest(unittest.TestCase):
             Helper.getKey(-1,13,180)
             Helper.getKey(150,13,370)
 
-doa=335.50149417699987
-pw=7.85932657958579
-rf=12.50335808421012
-print(Helper.getKey(pw,rf,doa))
-print(Helper.getKeyFromRawData(RawData(PW=pw,RF=rf,DOA=doa)))
+# doa=335.50149417699987
+# pw=7.85932657958579
+# rf=12.50335808421012
+# print(Helper.getKey(pw,rf,doa))
+# print(Helper.getKeyFromRawData(RawData(PW=pw,RF=rf,DOA=doa)))
+p=[1,2,3,4,5,6,7,8,9,0]
+
+a=p[0:3]
+print(p)
+print(a)

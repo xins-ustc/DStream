@@ -2,13 +2,16 @@ from Grid import *
 from Helper import *
 #用于管理包含数据的Grid
 class GridList:
-    grid_list={}
+    __grid_list={}
 
     #返回一个neighborKey数组
     def getNeighborKeys(self,grid_key):
         return Helper().getNeighborKeys(grid_key)
 
-
+    def getGrid(self,grid_key):
+        if not self.__grid_list.has_key(grid_key):
+            raise KeyError
+        return self.__grid_list[grid_key]
 
     #返回这个Grid的所有neighborGrid的数组
     def getNeighborGrids(self,grid_key):
@@ -76,7 +79,7 @@ class GridList:
                     grid_object.setRemoveTime(current_time)
                 elif SparseStatus.TEMP==grid_object.sparseStatus() or SparseStatus.NORMAL==grid_object.sparseStatus():
                     #判断s1和s2
-                    if grid_object.densityThreshold()>grid_object.density(current_time) and current_time>=(1+Helper().beta)*grid_object.time_remove():
+                    if grid_object.densityThreshold(current_time)>grid_object.densityWithTime(current_time) and current_time>=(1+Helper().beta)*grid_object.time_remove():
                         #符合s1,s2 放给TODELETE
                         grid_object.setSparseStatus(SparseStatus.TODELETE)
                     else:
