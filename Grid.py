@@ -23,6 +23,17 @@ class Grid:
     __change=0
     __key=0
 
+    def __init__(self):
+        __time_update = 0
+        __time_remove = 0
+        __density = 0
+        __cluster_key = -1
+        __densityStatus = DensityStatus.SPARSE
+        __sparseStatus = SparseStatus.NORMAL
+        __change = 0
+        __key = 0
+
+
 
     #tested
     def key(self):
@@ -125,4 +136,8 @@ class Grid:
     #test
     def resetChangeFlag(self):
         self.__change=0
+
+    #test
+    def change(self):
+        return self.__change
 

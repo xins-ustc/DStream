@@ -4,6 +4,7 @@ from Header import DensityStatus
 from Helper import  *
 import unittest
 from Grid import *
+from GridList import  *
 #这个函数用于输出某个grid被数据点击中时的密度结果，lam是lambda值，num是连续的点数,gap是间隔，如果是连续击中则gap=1
 def denseTest(lam,num,gap):
     pre = 1
@@ -16,22 +17,13 @@ def denseTest(lam,num,gap):
 def densityThreshold(Cl,lamb,tg,t,N):
     return (Cl*(1-(lamb**(t-tg+1))))/N*(1-lamb)
 
-def fun1():
-    raise Exception("hehe")
+gridList=GridList()
+g=Grid()
+g._Grid__density=3
+gridList._GridList__grid_list['2']=g
+g_temp=gridList.getGrid("2")
+g_temp._Grid__density=4
 
-class Testtest(unittest.TestCase):
-    def test_raise(self):
-        with self.assertRaisesRegex(ValueError,'pw'):
-            Helper.getKey(-1,13,180)
-            Helper.getKey(150,13,370)
-
-# doa=335.50149417699987
-# pw=7.85932657958579
-# rf=12.50335808421012
-# print(Helper.getKey(pw,rf,doa))
-# print(Helper.getKeyFromRawData(RawData(PW=pw,RF=rf,DOA=doa)))
-p=[1,2,3,4,5,6,7,8,9,0]
-
-a=p[0:3]
-print(p)
-print(a)
+g_new = gridList.getGrid("2")
+assert g_new.density()==g_temp.density()
+print(((Helper().Cl*(1-Helper().lamb))/(Helper().N*(1-Helper().lamb)))/Helper().lamb)

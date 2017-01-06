@@ -6,6 +6,10 @@ class ClusterManager:
     __cluster_key_index=0#用于区分不同的cluster,每有一个新cluster，+1
     #根据制定key获取cluster对象,否则返回null
 
+    def __init__(self):
+        self.__cluster_dic={}
+        self.__cluster_key_index=0
+
     def getCluster(self,cluster_key):
         if self.__cluster_dic.has_key(cluster_key):
             return self.__cluster_dic[cluster_key]

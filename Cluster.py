@@ -8,6 +8,7 @@ class Cluster:
 
     def __init__(self,cluster_key):
         self.__key=cluster_key
+        self.__grid_dic={}
 
     def getGrid(self,grid_key):
         if not self.__grid_dic.has_key(grid_key):

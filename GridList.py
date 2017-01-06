@@ -3,48 +3,59 @@ from Helper import *
 #用于管理包含数据的Grid
 class GridList:
     __grid_list={}
-
-    #返回一个neighborKey数组
-    def getNeighborKeys(self,grid_key):
-        return Helper().getNeighborKeys(grid_key)
+    def __init__(self):
+        self.__grid_list={}
 
     def getGrid(self,grid_key):
-        if not self.__grid_list.has_key(grid_key):
+        #注意！：若grid被remove，因为算法原因并没有从dic中删除，所以之前被删除的grid也会存在于
+        if not grid_key in self.__grid_list:
             raise KeyError
+        grid=self.__grid_list[grid_key]
+        if grid.time_remove()!=0 and grid.density()==0:
+            raise KeyError("grid has been remove though it still exist in grid_list")
         return self.__grid_list[grid_key]
 
     #返回这个Grid的所有neighborGrid的数组
     def getNeighborGrids(self,grid_key):
+        if not grid_key in self.__grid_list :
+            raise KeyError
+        grid=self.__grid_list[grid_key]
+        if grid.time_remove()!=0 and grid.density()==0:
+            raise KeyError("grid has been remove though it still exist in grid_list")
+
         #注意neighbor就是临近但是cluster不一样或者没有cluster的grid
         ret=[]
-        keys=self.getNeighborKeys(grid_key)
+        keys=Helper.getNeighborKeys(grid_key)
         for key in keys:
-            ret.append(self.grid_list[key])
+            if key in self.__grid_list:
+                gird=self.__grid_list[key]
+                if not (grid.density()==0 and grid.time_remove()!=0):
+                    ret.append(self.__grid_list[key])
         return ret
 
     #传入一个RawData类型的数据,然后将它放入对应Grid中并更新Grid的状态
     def addNewData(self,rawData,time):
         key=Helper().getKeyFromRawData(rawData)
-        if not self.grid_list.has_key(key):
+        if not key in self.__grid_list:
             grid_object=Grid()
             grid_object.addData(rawData,time)
-            self.grid_list[key]=grid_object
+            self.__grid_list[key]=grid_object
         else:
-            self.grid_list[key].addData(rawData,time)
+            self.__grid_list[key].addData(rawData,time)
 
     #返回一个包含dense的grid数组
     def getDenseGrids(self):
         ret=[]
-        for k in self.grid_list:
-            grid=self.grid_list[k]
+        for k in self.__grid_list:
+            grid=self.__grid_list[k]
             if DensityStatus.DENSE==grid.densityStatus():
                 ret.append(grid)
         return ret
     #拿到标记change的grid
     def getChangeGrids(self):
         ret=[]
-        for k in self.grid_list:
-            grid_object=self.grid_list[k]
+        for k in self.__grid_list:
+            grid_object=self.__grid_list[k]
             if 1==grid_object.change():
                 ret.append(grid_object)
 
@@ -53,25 +64,25 @@ class GridList:
 
     #!!!!注意!!!!这个操作并不会真正把grid从grid_list中删除(paper里表示因为tm参数的存在,如果删除了,tm怎么标记呢?)
     def delGrid(self,grid_key,time):
-        if not self.grid_list.has_key(grid_key):
-            raise Exception("grid_list没有这个key,删除失败")
+        if not grid_key in self.__grid_list:
+            raise KeyError("grid_list没有这个key,删除失败")
         else:
             #清空密度信息,只记录__time_remove
-            grid_object=self.grid_list[grid_key]
+            grid_object=self.__grid_list[grid_key]
             grid_object.clear()
             grid_object.setRemoveTime(time)
 
     #所有change置0
     def clearChangeFlag(self):
-        for k in self.grid_list:
-            grid_object=self.grid_list[k]
+        for k in self.__grid_list:
+            grid_object=self.__grid_list[k]
             grid_object.resetChangeFlag()
 
 
     #进入sporadic删除判定逻辑,处理所有grid
     def judgeAndremoveSporadic(self,current_time):
-        for k in self.grid_list:
-            grid_object = self.grid_list[k]
+        for k in self.__grid_list:
+            grid_object = self.__grid_list[k]
             if DensityStatus.SPARSE==grid_object.densityStatus():
                 if SparseStatus.TODELETE==grid_object.sparseStatus():
                     #删除(由于paper中提到保留tg即time_remove，所以不从grid_list中删除，而是只清空数据，并记录time_remove)

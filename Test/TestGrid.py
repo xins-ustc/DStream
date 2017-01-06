@@ -200,6 +200,10 @@ class TestGrid(unittest.TestCase):
         g._Grid__time_update=2
         value=g._Grid__density*(Helper().lamb**(5-2))
         self.assertEqual(value,g.densityWithTime(5))
+    def test_change(self):
+        g=Grid()
+        g._Grid__change=random.randint(1,1000)
+        self.assertEqual(g._Grid__change,g.change())
 
 if __name__ =="__main__":
     unittest.main()
