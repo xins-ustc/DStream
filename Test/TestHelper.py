@@ -84,6 +84,9 @@ class TestHelper(unittest.TestCase):
 
     #给定一个key，检查返回值是否是其neighbor
     def test_getNeighborKeys(self):
+        #TODO：测试边界点在获取Neighbor时是否获取成功
+
+
         rawData=HelperForTest.randomLegalRawData()
         key=Helper().getKeyFromRawData(rawData)
         neighbor_keys=Helper.getNeighborKeys(key)
@@ -94,6 +97,7 @@ class TestHelper(unittest.TestCase):
         self.assertIn(str(key_int-1000),neighbor_keys)
         self.assertIn(str(key_int+1),neighbor_keys)
         self.assertIn(str(key_int-1),neighbor_keys)
+
 
 if __name__=='__main__':
     unittest.main()

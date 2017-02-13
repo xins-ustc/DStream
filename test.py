@@ -1,10 +1,4 @@
-from enum import Enum
-import math
-from Header import DensityStatus
-from Helper import  *
-import unittest
-from Grid import *
-from GridList import  *
+
 #这个函数用于输出某个grid被数据点击中时的密度结果，lam是lambda值，num是连续的点数,gap是间隔，如果是连续击中则gap=1
 def denseTest(lam,num,gap):
     pre = 1
@@ -13,17 +7,6 @@ def denseTest(lam,num,gap):
         pre = cur
         print('cur ', i, '  dense=', cur)
 
-
-def densityThreshold(Cl,lamb,tg,t,N):
-    return (Cl*(1-(lamb**(t-tg+1))))/N*(1-lamb)
-
-gridList=GridList()
-g=Grid()
-g._Grid__density=3
-gridList._GridList__grid_list['2']=g
-g_temp=gridList.getGrid("2")
-g_temp._Grid__density=4
-
-g_new = gridList.getGrid("2")
-assert g_new.density()==g_temp.density()
-print(((Helper().Cl*(1-Helper().lamb))/(Helper().N*(1-Helper().lamb)))/Helper().lamb)
+a=[(1,1,1),(60,3,30),(3,3,3)]
+for tu in a:
+    print(tu)

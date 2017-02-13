@@ -1,4 +1,4 @@
-from Helper import  *
+from Helper import *
 
 
 class Cluster:
@@ -12,7 +12,7 @@ class Cluster:
 
     def getGrid(self,grid_key):
         if not self.__grid_dic.has_key(grid_key):
-            raise Exception("Cluster getGrid:没有这个grid")
+            raise KeyError("Cluster getGrid:没有这个grid")
         else:
             return self.__grid_dic[grid_key]
 
@@ -20,19 +20,21 @@ class Cluster:
         return self.__key
 
     def isGridExist(self,grid_object):
-        if self.__grid_dic.has_key(grid_object.key()):
+        if grid_object.key() in self.__grid_dic:
             return True
         return False
 
     def isGridExistWithKey(self,grid_key):
-        if self.__grid_dic.has_key(grid_key):
+        if grid_key in self.__grid_dic:
             return True
         return False
 
     #往当前cluster中加入grid
     def addGrid(self,grid_object):
         key=grid_object.key()
-        if self.__grid_dic.has_key(key):
+        if int(key) <0:
+            raise KeyError("key不能小于0")
+        if key in self.__grid_dic:
             raise Exception("Cluster addGrid：该Cluster已存在这个grid")
         else:
             self.__grid_dic[key]=grid_object
@@ -41,7 +43,7 @@ class Cluster:
     #从cluster中删除grid(这个操作不理会grid_list)
     def delGrid(self,grid_object):
         if not self.__grid_dic.has_key(grid_object.key()):
-            raise Exception("Cluster delGrid:这个Cluster中不存在这个grid")
+            raise KeyError("Cluster delGrid:这个Cluster中不存在这个grid")
         else:
             grid_object.setClusterKey(-1)
             self.__grid_dic.pop(grid_object.key())
@@ -50,7 +52,7 @@ class Cluster:
     #判断某grid是否为该cluster的outside_grid
     def isOutsideGrid(self,grid_object):
         if not self.__grid_dic.has_key(grid_object.key()):
-            raise Exception("Cluster isOutsideGrid:这个grid不在该Cluster",grid_object.key(),self.__key)
+            raise KeyError("Cluster isOutsideGrid:这个grid不在该Cluster",grid_object.key(),self.__key)
         else:
             #判断grid的位置(判断它的方块的6个面，若6个面的grid都在cluster里，说明是inside)
             neighbor_keys=Helper().getNeighborKeys(grid_object.key())
@@ -70,7 +72,7 @@ class Cluster:
     # 判断如果加入指定cluster是不是它的outside
     def isOutsideIfAdd(self, grid_object):
         if self.__grid_dic.has_key(grid_object.key()):
-            raise Exception("Cluster isOutsiedIfAdd：该grid已经在本Cluster里",grid_object.key(),self.__key)
+            raise KeyError("Cluster isOutsiedIfAdd：该grid已经在本Cluster里",grid_object.key(),self.__key)
         else:
             #判断outside（）
             neighbor_keys = Helper().getNeighborKeys(grid_object.key())
