@@ -1,3 +1,6 @@
+import sys
+sys.path.append("..")
+
 from Helper import *
 import unittest
 from HelperForTest import *

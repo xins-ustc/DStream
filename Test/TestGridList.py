@@ -1,3 +1,6 @@
+import sys
+sys.path.append("..")
+
 import unittest
 from GridList import *
 from Grid import *

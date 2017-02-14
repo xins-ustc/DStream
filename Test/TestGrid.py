@@ -1,3 +1,6 @@
+import sys
+sys.path.append("..")
+
 from Helper import *
 import unittest
 from TestHelper import  *
@@ -104,7 +107,7 @@ class TestGrid(unittest.TestCase):
         g._Grid__density=Helper().Dm+100
         g._Grid__time_update=1 #上次更新时间和当前时间相同，保证density不会太多的改变，更利于测试
         self.assertEqual(g.density(),Helper().Dm+100)
-        g.addData(rawData,1)
+        g.addData(rawData,2)
         self.assertEqual(g._Grid__change,1)
         self.assertEqual(DensityStatus.DENSE,g.densityStatus())
 
@@ -112,7 +115,7 @@ class TestGrid(unittest.TestCase):
         g._Grid__change=0
         g._Grid__densityStatus = DensityStatus.DENSE
         g._Grid__density=Helper.Dl-100
-        g.addData(rawData, 1)
+        g.addData(rawData, 3)
         self.assertEqual(g._Grid__change,1)
         self.assertEqual(DensityStatus.SPARSE, g.densityStatus())
 
@@ -125,7 +128,7 @@ class TestGrid(unittest.TestCase):
         self.assertLess(g.density(),Helper().Dm)
 
 
-        g.addData(rawData,1)
+        g.addData(rawData,4)
 
         self.assertEqual(g._Grid__change,1)
         self.assertEqual(DensityStatus.TRANSITIONAL,g.densityStatus())
@@ -133,21 +136,21 @@ class TestGrid(unittest.TestCase):
         g._Grid__change = 0
         g._Grid__densityStatus = DensityStatus.SPARSE
         g._Grid__density = Helper.Dl + (Helper.Dl + Helper.Dm) / 2
-        g.addData(rawData, 1)
+        g.addData(rawData, 5)
         self.assertEqual(g._Grid__change, 1)
         self.assertEqual(DensityStatus.TRANSITIONAL, g.densityStatus())
 
         #测试TODELETE
         g._Grid__sparseStatus=SparseStatus.TODELETE
-        g.addData(rawData,1)
+        g.addData(rawData,6)
         self.assertEqual(g._Grid__sparseStatus,SparseStatus.TEMP)
 
         g._Grid__sparseStatus = SparseStatus.NORMAL
-        g.addData(rawData, 1)
+        g.addData(rawData, 7)
         self.assertEqual(g._Grid__sparseStatus, SparseStatus.NORMAL)
 
         g._Grid__sparseStatus = SparseStatus.TEMP
-        g.addData(rawData, 1)
+        g.addData(rawData, 8)
         self.assertEqual(g._Grid__sparseStatus, SparseStatus.TEMP)
 
 

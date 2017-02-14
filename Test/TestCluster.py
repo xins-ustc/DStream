@@ -1,5 +1,8 @@
 import unittest
-from Cluster import *
+import sys
+sys.path.append("..")
+
+from  Cluster import *
 from Grid import *
 class TestCluster(unittest.TestCase):
     def test_init(self):
@@ -25,7 +28,7 @@ class TestCluster(unittest.TestCase):
     def test_isGridExist(self):
 
         #case1:存在返回False
-        cluster=Cluster()
+        cluster=Cluster(1)
         grid=Grid()
         grid._Grid__key=342
         self.assertFalse(cluster.isGridExist(grid))
@@ -35,7 +38,7 @@ class TestCluster(unittest.TestCase):
 
     def test_isGridExistWithKey(self):
         # case1:存在返回True
-        cluster=Cluster()
+        cluster=Cluster(1)
         self.assertFalse(cluster.isGridExistWithKey(1))
         # case2：不存在返回false
         grid=Grid()
@@ -83,7 +86,7 @@ class TestCluster(unittest.TestCase):
         #case1:grid不在cluster里，抛出异常
         cluster=Cluster(1)
         g=Grid()
-        with self.assertRaisesRegex(KeyError):
+        with self.assertRaises(KeyError):
             cluster.isOutsideGrid(g)
         #case2：grid在cluster里，但不是Outside，返回false
         cluster = Cluster(1)
@@ -116,16 +119,16 @@ class TestCluster(unittest.TestCase):
     def test_size(self):
         #case1:返回正确的size
         cluster=Cluster(1)
-        self.assertEqual(len(self.__grid_dic),cluster.size())
+        self.assertEqual(len(cluster._Cluster__grid_dic),cluster.size())
         for i in range(1,10):
             grid=Grid()
             grid._Grid__key=i
             cluster.addGrid(grid)
-        self.assertEqual(len(self.__grid_dic), cluster.size())
+        self.assertEqual(len(cluster._Cluster__grid_dic), cluster.size())
 
     def test_isOutsideIfAdd(self):
         #case0:grid已存在，抛出异常
-        cluster=Cluster()
+        cluster=Cluster(1)
         g=Grid()
         raw=HelperForTest.randomLegalRawData()
         g.addData(raw,1)
@@ -163,13 +166,13 @@ class TestCluster(unittest.TestCase):
         raw=HelperForTest.randomLegalRawData()
         g=Grid()
         g.addData(raw,1)
+        cluster.addGrid(g)
         key=Helper.getKeyFromRawData(raw)
         keys=Helper.getNeighborKeys(key)
         for k in keys:
             g=Grid()
             g._Grid__key=k
             cluster.addGrid(g)
-        Helper.getNeighborKeys()
         self.assertTrue(cluster.isClusterSingle())
 
         #case2：构造分离Cluster，返回False

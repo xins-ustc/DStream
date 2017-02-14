@@ -1,4 +1,4 @@
-import Cluster
+from Cluster import *
 from Helper import  *
 #用于对类簇进行管理和操作
 class ClusterManager:
@@ -11,22 +11,25 @@ class ClusterManager:
         self.__cluster_key_index=0
 
     def getCluster(self,cluster_key):
-        if self.__cluster_dic.has_key(cluster_key):
-            return self.__cluster_dic[cluster_key]
+        if not cluster_key in self.__cluster_dic:
+            raise KeyError
         else:
-            return None
+            return self.__cluster_dic[cluster_key]
 
     #将grid加入为一个新的cluster
+    #该函数不检查其他cluster是否已经有该grid
     def addNewCluster(self,grid_object):
         self.__cluster_key_index+=1
         cluster=Cluster(self.__cluster_key_index)
         cluster.addGrid(grid_object)
+        self.__cluster_dic[self.__cluster_key_index]=cluster
 
     #返回某grid的neighboring的cluster数组
     def getNeighborClusters(self,grid_object):
         ret_clusters=[]
-        keys=Helper().getNeighborKeys(grid_object.key())
-        for cluster in self.__cluster_dic:
+        keys=Helper.getNeighborKeys(grid_object.key())
+        for k in self.__cluster_dic:
+            cluster=self.__cluster_dic[k]
             for k in keys:
                 if cluster.isGridExistWithKey(k):
                     ret_clusters.append(cluster)
@@ -34,15 +37,15 @@ class ClusterManager:
         return ret_clusters
 
 
-    #一个dic，key是cluster的编号，value是cluster的集合
+    #一个cluster数组
     def getAllCluster(self):
         return self.__cluster_dic
 
-    #把target并如source
+    #把target并入source
     def mergeCluster(self,source_key,target_key):
-        if not self.__cluster_dic.has_key(source_key):
+        if not source_key in self.__cluster_dic:
             raise Exception("ClusterManager mergeCluster:source_key不存在",source_key)
-        if not self.__cluster_dic.__has_key(target_key):
+        if not target_key in self.__cluster_dic:
             raise Exception("ClusterManager mergeCluster:target_key不存在", target_key)
 
         source_cluster=  self.__cluster_dic[source_key]
@@ -60,14 +63,15 @@ class ClusterManager:
 
     #切分cluster
     def splitCluster(self,cluster_key):
-        if not self.__cluster_dic.has_key(cluster_key):
+        if not cluster_key in self.__cluster_dic:
             raise Exception("ClusterManager splitCluster：cluster不存在")
 
         cluster=self.__cluster_dic[cluster_key]
         grids=cluster.getAllGrids()
 
         keys=[]
-        for g in grids:
+        for k in grids:
+            g=grids[k]
             keys.append(g.key())
        #！！！这里的处理流程和isSingle重复了，但是为了保证函数的不变，只能复制一遍
         stop = 0
@@ -93,9 +97,9 @@ class ClusterManager:
             for k in flag_dic:
                 item = flag_dic[k]
                 if 1 == item:
-                    neighbor_keys = Helper().getNeighborKeys()
+                    neighbor_keys = Helper.getNeighborKeys(k)
                     for neighbor_key in neighbor_keys:
-                        if flag_dic.has_key(neighbor_key):
+                        if neighbor_key in flag_dic:
                             flag_dic[neighbor_key] = 1
                     flag_dic[k] = 2
 

@@ -66,12 +66,25 @@ class Helper:
         #TODO:需要判断边界条件来处理key处在边界不能完全返回6个neighbor的情况
         key=int(key)
         ret=[]
-        accuracy=[1000000,1000,1]
 
         #根据neighbor的定义，3个维度分别加减1即可得到对应的neighbor的key
-        for a in accuracy:
-            ret.append(str(key+a))
-            ret.append(str(key-a))
+        pw=round(key/1000000)
+        if pw!=2000:
+            ret.append(str(key+1000000))
+        if pw!=0:
+            ret.append(str(key-1000000))
+
+        rf=round((key%1000000)/1000)
+        if pw!=300:
+            ret.append(str(key+1000))
+        if pw!=0:
+            ret.append(str(key-1000))
+
+        doa=key%1000
+        if doa!=720:
+            ret.append(str(key+1))
+        if doa!=0:
+            ret.append(str(key-1))
         return ret
 
 

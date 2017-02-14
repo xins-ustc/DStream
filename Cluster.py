@@ -11,7 +11,7 @@ class Cluster:
         self.__grid_dic={}
 
     def getGrid(self,grid_key):
-        if not self.__grid_dic.has_key(grid_key):
+        if not grid_key in self.__grid_dic:
             raise KeyError("Cluster getGrid:没有这个grid")
         else:
             return self.__grid_dic[grid_key]
@@ -42,7 +42,7 @@ class Cluster:
 
     #从cluster中删除grid(这个操作不理会grid_list)
     def delGrid(self,grid_object):
-        if not self.__grid_dic.has_key(grid_object.key()):
+        if not grid_object.key() in self.__grid_dic:
             raise KeyError("Cluster delGrid:这个Cluster中不存在这个grid")
         else:
             grid_object.setClusterKey(-1)
@@ -51,14 +51,14 @@ class Cluster:
 
     #判断某grid是否为该cluster的outside_grid
     def isOutsideGrid(self,grid_object):
-        if not self.__grid_dic.has_key(grid_object.key()):
+        if not grid_object.key() in self.__grid_dic:
             raise KeyError("Cluster isOutsideGrid:这个grid不在该Cluster",grid_object.key(),self.__key)
         else:
             #判断grid的位置(判断它的方块的6个面，若6个面的grid都在cluster里，说明是inside)
-            neighbor_keys=Helper().getNeighborKeys(grid_object.key())
+            neighbor_keys=Helper.getNeighborKeys(grid_object.key())
             for k in neighbor_keys:
                 #如果这个key不存在，说明就是outside了
-                if not self.__grid_dic.has_key(k):
+                if not k in self.__grid_dic:
                     return True
             return False
 
@@ -71,13 +71,13 @@ class Cluster:
 
     # 判断如果加入指定cluster是不是它的outside
     def isOutsideIfAdd(self, grid_object):
-        if self.__grid_dic.has_key(grid_object.key()):
+        if grid_object.key() in self.__grid_dic:
             raise KeyError("Cluster isOutsiedIfAdd：该grid已经在本Cluster里",grid_object.key(),self.__key)
         else:
             #判断outside（）
-            neighbor_keys = Helper().getNeighborKeys(grid_object.key())
+            neighbor_keys = Helper.getNeighborKeys(grid_object.key())
             for k in neighbor_keys:
-                if not self.__grid_dic.has_key(k):
+                if not k in self.__grid_dic:
                     return True
             return False
 
@@ -100,7 +100,7 @@ class Cluster:
         stop=0
         #初始化flag_dic
         flag_dic={}
-        keys=self.__grid_dic.keys()
+        keys=list(self.__grid_dic.keys())
         for k in keys:
             flag_dic[k]=0
         #将第一个key对应的flag设置为1
@@ -120,9 +120,9 @@ class Cluster:
             for k in flag_dic:
                 item = flag_dic[k]
                 if 1==item:
-                    neighbor_keys=Helper().getNeighborKeys()
+                    neighbor_keys=Helper.getNeighborKeys(k)
                     for neighbor_key in neighbor_keys:
-                        if flag_dic.has_key(neighbor_key):
+                        if neighbor_key in  flag_dic:
                             flag_dic[neighbor_key]=1
                     flag_dic[k]=2
 
