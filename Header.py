@@ -29,9 +29,17 @@ class RawData:
     DOA=0
     #RF，载频，常规雷达范围是1G~15GHz
     RF=0
-    #脉宽，0.1μs~200μs 测量精度是50ns
+    #脉宽，0.1μs~200μs 测量精度是50ns/
     PW=0
+    #======可选参数===========
+    #以下参数是程序辅助使用，和算法无关
+    toa=0
+    cluster=0
+
     def __init__(self,PW,RF,DOA):
         self.DOA=DOA
         self.RF=RF
         self.PW=PW
+
+
+

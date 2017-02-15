@@ -1,9 +1,10 @@
-import Header
-import Grid
+from Header import *
+from Grid import Grid
 from Helper import *
-import Cluster
-import ClusterManager
-import GridList
+from Cluster import Cluster
+
+from ClusterManager import ClusterManager
+from GridList import GridList
 import math
 from Helper import *
 from Header import *
@@ -30,28 +31,30 @@ class D_Stream:
         self.tc=0;
         self.cluster_manager=ClusterManager()
         self.grid_list=GridList()
-        self.gap = Helper().getGap()
+        self.gap = Helper().gap()
 
     #注释:现在直接往cluster里加grid就可以
     # def __addToCluster(self,grid,cluster):
-    #     #TODO:加到cluster里
-    #     #TODO:更新操作clusters表
+    #     #到cluster里
+    #     #更新操作clusters表
 
 
 
 
 
     def __adjust_sparse(self,grid_object):
+        try:
             #把这个grid从cluster中移除
             cluster_object=self.cluster_manager.getCluster(grid_object.key())
+        except KeyError:
+            print("__adjust_sparse:grid_object not exist in cluster")
+        finally:
+            cluster_object.delGrid(grid_object.key())
 
-            if not cluster_object==None:
-                cluster_object.delGrid(grid_object.key())
-
-                #判断被删除grid的cluster有没有被分离成两个cluster若有，进行处理
-                if not cluster_object.isClusterSingle():
-                    self.cluster_manager.splitCluster(cluster_object.key())
-    #=================================================
+            #判断被删除grid的cluster有没有被分离成两个cluster若有，进行处理
+            if not cluster_object.isClusterSingle():
+                self.cluster_manager.splitCluster(cluster_object.key())
+#=================================================
 
     def __adjust_dense_neighbor_dense(self,grid_object,grid_h_object):
     #如果g还没有cluster，调用__addToClusters
@@ -96,10 +99,14 @@ class D_Stream:
         max_size=0
         grid_h_object=None
         for item in neighbors:
-            cluster=self.cluster_manager.getCluster(item.key())
-            if not None==cluster and cluster.size()>max_size:
-                max_size=cluster.size()
-                grid_h_object=item
+            try:
+                cluster=self.cluster_manager.getCluster(item.cluster_key())
+            except KeyError:
+                print("__adjust_dense:KeyError:cannot find the cluster of this grid")
+            finally:
+                if cluster.size()>max_size:
+                    max_size=cluster.size()
+                    grid_h_object=item
 
         #如果这个if触发，说明neighbor都是没有cluster的
         if 0==max_size:
@@ -112,7 +119,7 @@ class D_Stream:
 
             self.__adjust_dense_neighbor_dense(grid_object,grid_h_object)
 
-        #如果g是一个transitinal，
+        #如果h是一个transitinal，
         elif DensityStatus.TRANSITIONAL==grid_h_object.densityStatus():
 
             self.__adjust_dense_neighbor_transitional(grid_object,grid_h_object)
@@ -214,7 +221,7 @@ class D_Stream:
     def do_DStream(self,rawData):
         self.tc+=1
         #得到key值后，我们将数据点打到相应的grid中，然后更新其信息
-        self.grid_list.addNewData(rawData)
+        self.grid_list.addNewData(rawData,self.tc)
         #grid_key=Helper.getKeyFromRawData(rawData)
         #判断grid_list里面有没有对应key，没有先添加
         #if not self.grid_list.has_key(grid_key):
