@@ -1,9 +1,11 @@
+import sys
+sys.path.append("..")
 from DStream import  *
 from Helper import *
 import unittest
-import sys
+
 from HelperForTest import *
-sys.path.append("..")
+
 
 
 class TestDStream(unittest.TestCase):
@@ -196,7 +198,7 @@ class TestDStream(unittest.TestCase):
         manager=dstream.cluster_manager
         g=Grid()
         g._Grid__key='1000100100'
-
+        grid_list._GridList__grid_list[g.key()] = g
         c11=Grid()
         c11._Grid__key='1001100100'
         c12=Grid()
@@ -206,8 +208,8 @@ class TestDStream(unittest.TestCase):
         cluster1.addGrid(c12)
         manager._ClusterManager__cluster_dic[1]=cluster1
         manager._ClusterManager__cluster_key_index+=1
-        grid_list[c11.key()]=c11
-        grid_list[c12.key()]=c12
+        grid_list._GridList__grid_list[c11.key()]=c11
+        grid_list._GridList__grid_list[c12.key()]=c12
 
         c21 = Grid()
         c21._Grid__key = '1000101100'
@@ -222,10 +224,10 @@ class TestDStream(unittest.TestCase):
         cluster2.addGrid(c23)
         manager._ClusterManager__cluster_dic[2] = cluster1
         manager._ClusterManager__cluster_key_index += 1
-        grid_list[c21.key()] = c21
-        grid_list[c22.key()] = c22
-        grid_list[c23.key()] = c23
-        self.assertEqual(0,dstream._D_Stream__adjust_dense())
+        grid_list._GridList__grid_list[c21.key()] = c21
+        grid_list._GridList__grid_list[c22.key()] = c22
+        grid_list._GridList__grid_list[c23.key()] = c23
+        self.assertEqual(0,dstream._D_Stream__adjust_dense(g))
 
         #两个neighbor cluster，一大一小,其中h是transitional
         dstream = D_Stream()
@@ -233,7 +235,7 @@ class TestDStream(unittest.TestCase):
         manager = dstream.cluster_manager
         g = Grid()
         g._Grid__key = '1000100100'
-
+        grid_list._GridList__grid_list[g.key()] = g
         c11 = Grid()
         c11._Grid__key = '1001100100'
         c12 = Grid()
@@ -243,8 +245,8 @@ class TestDStream(unittest.TestCase):
         cluster1.addGrid(c12)
         manager._ClusterManager__cluster_dic[1] = cluster1
         manager._ClusterManager__cluster_key_index += 1
-        grid_list[c11.key()] = c11
-        grid_list[c12.key()] = c12
+        grid_list._GridList__grid_list[c11.key()] = c11
+        grid_list._GridList__grid_list[c12.key()] = c12
 
         c21 = Grid()
         c21._Grid__key = '1000101100'
@@ -259,34 +261,34 @@ class TestDStream(unittest.TestCase):
         cluster2.addGrid(c23)
         manager._ClusterManager__cluster_dic[2] = cluster1
         manager._ClusterManager__cluster_key_index += 1
-        grid_list[c21.key()] = c21
-        grid_list[c22.key()] = c22
-        grid_list[c23.key()] = c23
-        self.assertEqual(0,dstream._D_Stream__adjust_dense())
+        grid_list._GridList__grid_list[c21.key()] = c21
+        grid_list._GridList__grid_list[c22.key()] = c22
+        grid_list._GridList__grid_list[c23.key()] = c23
+        self.assertEqual(0,dstream._D_Stream__adjust_dense(g))
 
         #不存在neighbor cluster
         dstream = D_Stream()
         raw = HelperForTest.randomLegalRawData()
         key = Helper.getKeyFromRawData(raw)
         dstream.do_DStream(raw)
-        grid = dstream.grid_list[key]
+        grid = dstream.grid_list._GridList__grid_list[key]
         dstream._D_Stream__adjust_dense(grid)
-        self.assertEqual(-1,dstream._D_Stream__adjust_dense())
+        self.assertEqual(-1,dstream._D_Stream__adjust_dense(grid))
 
         #有neighbor但师neighbor没有cluster
         dstream = D_Stream()
         raw = HelperForTest.randomLegalRawData()
         key = Helper.getKeyFromRawData(raw)
         dstream.do_DStream(raw)
-        grid = dstream.grid_list[key]
+        grid = dstream.grid_list._GridList__grid_list[key]
         keys=Helper.getNeighborKeys(key)
         for k in keys:
             g=Grid()
             g._Grid__key=k
-            dstream.grid_list[k]=g
+            dstream.grid_list._GridList__grid_list[k]=g
             break
         dstream._D_Stream__adjust_dense(grid)
-        self.assertEqual(-2,dstream._D_Stream__adjust_dense())
+        self.assertEqual(-2,dstream._D_Stream__adjust_dense(grid))
 
 
 
@@ -318,7 +320,7 @@ class TestDStream(unittest.TestCase):
             h=Grid()
             h._Grid__key=k
             cluster1.addGrid(h)
-            dstream.grid_list[k]=h
+            dstream.grid_list._GridList__grid_list[k]=h
 
 
         dstream._D_Stream__adjust_transitional(g)
@@ -331,13 +333,13 @@ class TestDStream(unittest.TestCase):
         g._Grid__key = '1000100100'
         keys = Helper.getNeighborKeys(g.key())
         cluster1 = Cluster(1)
-        dstream.manager._ClusterManager__cluster_dic[1] = cluster1
-        dstream.manager._ClusterManager__cluster_key_index+=1
+        dstream.cluster_manager._ClusterManager__cluster_dic[1] = cluster1
+        dstream.cluster_manager._ClusterManager__cluster_key_index+=1
         for k in keys:
             h = Grid()
             h._Grid__key = k
             cluster1.addGrid(h)
-            dstream.grid_list[k] = h
+            dstream.grid_list._GridList__grid_list[k] = h
             break
 
         dstream._D_Stream__adjust_transitional(g)
@@ -352,11 +354,11 @@ class TestDStream(unittest.TestCase):
             k=int(key)+3000000
             g=Grid()
             g._Grid__key=str(k)
-            dstream.grid_list[k]=g
+            dstream.grid_list._GridList__grid_list[k]=g
         dstream._D_Stream__initial_clustring()
         for i in range(1,100):
             k=int(key)+3000000
-            grid=dstream.grid_list[k]
+            grid=dstream.grid_list._GridList__grid_list[k]
             self.assertEqual(grid.clusterKey(),-1)
 
         #1-2、其中50个是dense，25个transitional，25个sparse，检查50个被分入各自cluster，但是其他50个没有cluster
@@ -368,7 +370,7 @@ class TestDStream(unittest.TestCase):
             k = int(key) + 3000000
             g = Grid()
             g._Grid__key = str(k)
-            dstream.grid_list[k] = g
+            dstream.grid_list._GridList__grid_list[k] = g
             if index<50:
                 g._Grid__densityStatus=DensityStatus.DENSE
             elif index<75:
@@ -379,7 +381,7 @@ class TestDStream(unittest.TestCase):
         for i in range(1, 100):
             index+=1
             k = int(key) + 3000000
-            grid=dstream.grid_list[k]
+            grid=dstream.grid_list._GridList__grid_list[k]
             if index < 50:
                 self.assertNotEqual(-1,grid.clusterKey())
             else:
@@ -399,13 +401,13 @@ class TestDStream(unittest.TestCase):
             g=Grid()
             g._Grid__key=key
             cluster.addGrid(g)
-            dstream.grid_list[key]=g
+            dstream.grid_list._GridList__grid_list[key]=g
             n_keys=Helper.getNeighborKeys(key)
             for n_key in n_keys:
                 n_grid=Grid()
                 n_grid._Grid__key=n_key
                 cluster.addGrid(n_grid)
-                dstream.grid_list[n_keys]=n_grid
+                dstream.grid_list._GridList__grid_list[n_keys]=n_grid
         dstream._D_Stream__initial_clustring()
         clusters=dstream.cluster_manager.getAllCluster()
         for cluster in clusters:
@@ -418,7 +420,7 @@ class TestDStream(unittest.TestCase):
         g=Grid()
         g._Grid__key='100100'
         cluster.addGrid(g)
-        dstream.grid_list[g.key()]=g
+        dstream.grid_list._GridList__grid_list[g.key()]=g
         dstream.cluster_manager._ClusterManager__cluster_dic[1]=cluster
         dstream.cluster_manager._ClusterManager__cluster_key_index+=1
 
@@ -432,8 +434,8 @@ class TestDStream(unittest.TestCase):
         g2 = Grid()
         g2._Grid__key = '1100102'
         cluster.addGrid(g2)
-        dstream.grid_list[g.key()] = g
-        dstream.grid_list[g1.key()] = g1
+        dstream.grid_list._GridList__grid_list[g.key()] = g
+        dstream.grid_list._GridList__grid_list[g1.key()] = g1
         dstream.cluster_manager._ClusterManager__cluster_dic[2] = cluster
         dstream.cluster_manager._ClusterManager__cluster_key_index += 1
 
@@ -444,8 +446,8 @@ class TestDStream(unittest.TestCase):
         g1 = Grid()
         g1._Grid__key = '1001100101'
         cluster.addGrid(g1)
-        dstream.grid_list[g.key()] = g
-        dstream.grid_list[g1.key()] = g1
+        dstream.grid_list._GridList__grid_list[g.key()] = g
+        dstream.grid_list._GridList__grid_list[g1.key()] = g1
         dstream.cluster_manager._ClusterManager__cluster_dic[3] = cluster
         dstream.cluster_manager._ClusterManager__cluster_key_index += 1
 
@@ -454,14 +456,14 @@ class TestDStream(unittest.TestCase):
         g = Grid()
         g._Grid__key = '1002100100'
         cluster.addGrid(g)
-        dstream.grid_list[g.key()] = g
+        dstream.grid_list._GridList__grid_list[g.key()] = g
         dstream.cluster_manager._ClusterManager__cluster_dic[4] = cluster
         dstream.cluster_manager._ClusterManager__cluster_key_index += 1
 
 
         h=Grid()
         h._Grid__key='1003100100'
-        dstream.grid_list[h.key()] = g
+        dstream.grid_list._GridList__grid_list[h.key()] = g
 
         dstream._D_Stream__initial_clustring()
             #运行函数后，只剩下两个cluster
@@ -479,5 +481,13 @@ class TestDStream(unittest.TestCase):
 
 
     def test_do_DStream(self):
-        #TODO:两个gap的数据量来做覆盖测试
+        #两个gap的数据量来做覆盖测试
+        dstream=D_Stream()
+        gap=Helper().gap()
+        for i in range(0,2*gap):
+            raw=HelperForTest.randomLegalRawData()
+            dstream.do_DStream(raw)
+        self.assertEqual(2*gap,dstream.tc)
 
+if __name__ =="__main__":
+    unittest.main()

@@ -46,10 +46,10 @@ class D_Stream:
         try:
             #把这个grid从cluster中移除
             cluster_object=self.cluster_manager.getCluster(grid_object.key())
+            cluster_object.delGrid(grid_object.key())
         except KeyError:
             print("__adjust_sparse:grid_object not exist in cluster")
-        finally:
-            cluster_object.delGrid(grid_object.key())
+
 
             #判断被删除grid的cluster有没有被分离成两个cluster若有，进行处理
             if not cluster_object.isClusterSingle():
@@ -59,7 +59,7 @@ class D_Stream:
     def __adjust_dense_neighbor_dense(self,grid_object,grid_h_object):
     #如果g还没有cluster，调用__addToClusters
         if -1==grid_object.clusterKey():
-            grid_h_cluster_object=self.cluster_manager.getCluster(grid_h_object.key())
+            grid_h_cluster_object=self.cluster_manager.getCluster(grid_h_object.clusterKey())
             grid_h_cluster_object.addGrid(grid_object)
 
         #如果g已经有cluster且他的cluseter比h大，那么吞并h的cluster，否则反向吞并
@@ -75,7 +75,7 @@ class D_Stream:
 
     def __adjust_dense_neighbor_transitional(self,grid_object,grid_h_object):
         # 拿h的cluster
-        grid_h_cluster_object = self.cluster_manager.getCluster(grid_h_object.key())
+        grid_h_cluster_object = self.cluster_manager.getCluster(grid_h_object.clusterKey())
         grid_h_cluster_object.addGrid(grid_object)
         if -1==grid_object.clusterKey():
             #把grid加到h的cluster里并判断此时h是不是outside,如果不是再把grid拿出来
@@ -100,7 +100,7 @@ class D_Stream:
         grid_h_object=None
         for item in neighbors:
             try:
-                cluster=self.cluster_manager.getCluster(item.cluster_key())
+                cluster=self.cluster_manager.getCluster(item.clusterKey())
                 if cluster.size()>max_size:
                     max_size=cluster.size()
                     grid_h_object=item
@@ -136,6 +136,8 @@ class D_Stream:
 
         neighbor_clusters=self.cluster_manager.getNeighborClusters(grid_object)
     #在neighbor的grid中找出一个cluster，这个cluster最大且当g加入以后g师outside
+        the_ret_cluster_key=0
+        the_ret_cluster_size=0
         for cluster in neighbor_clusters:
             the_ret_cluster_key=-1
             the_ret_cluster_size=0
@@ -144,7 +146,7 @@ class D_Stream:
                     the_ret_cluster_size=cluster.size()
                     the_ret_cluster_key=cluster.key()
         #for循环结束就能找到了,当然也可能没有
-        if not -1==the_ret_cluster_key and 0==the_ret_cluster_size:
+        if -1!=the_ret_cluster_key and 0!=the_ret_cluster_size:
             target=self.cluster_manager.getCluster(the_ret_cluster_key)
             target.addGrid(grid_object)
 
