@@ -94,23 +94,23 @@ class D_Stream:
         #得到这个dense grid （暂且叫g）的所有neighboring grid，在所有neighbor中找出cluster最大的一个grid叫grid_h
         neighbors=self.grid_list.getNeighborGrids(grid_object.key())
         if 0==len(neighbors):
-            return
+            return -1
 
         max_size=0
         grid_h_object=None
         for item in neighbors:
             try:
                 cluster=self.cluster_manager.getCluster(item.cluster_key())
-            except KeyError:
-                print("__adjust_dense:KeyError:cannot find the cluster of this grid")
-            finally:
                 if cluster.size()>max_size:
                     max_size=cluster.size()
                     grid_h_object=item
+            except KeyError:
+                print("__adjust_dense:KeyError:cannot find the cluster of this grid，there are some problem in your code")
+
 
         #如果这个if触发，说明neighbor都是没有cluster的
         if 0==max_size:
-            return
+            return -2
 
 
 
@@ -124,7 +124,7 @@ class D_Stream:
 
             self.__adjust_dense_neighbor_transitional(grid_object,grid_h_object)
 
-
+        return 0
 
     #=================================================
 
@@ -156,7 +156,7 @@ class D_Stream:
 
     #=================================================
 
-    def initial_clustring(self):
+    def __initial_clustring(self):
         #把所有的dense的grid设置为单独的cluster
         dense_grids=self.grid_list.getDenseGrids()
         for grid in dense_grids:
@@ -193,7 +193,7 @@ class D_Stream:
             if not 0==change_flag:
                 stop_flag=1
 
-    def adjust_clustring(self):
+    def __adjust_clustring(self):
         #得到一个已经改变过的change_flag==1的数组
         change_grids=self.grid_list.getChangeGrids()
         #遍历这个数组，处理每一个grid的C_Vector
@@ -233,11 +233,11 @@ class D_Stream:
 
         #TODO:首次到达gap
         if self.tc == self.gap:
-            self.initial_clustring()
+            self.__initial_clustring()
         if self.tc%self.gap == 0:
             #判断sporadic的状态并删除符合条件的grid
             self.grid_list.judgeAndremoveSporadic()
-            self.adjust_clustring()
+            self.__adjust_clustring()
         #清空change为0
         self.grid_list.clearChangeFlag()
 
