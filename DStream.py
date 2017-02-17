@@ -43,17 +43,13 @@ class D_Stream:
 
 
     def __adjust_sparse(self,grid_object):
-        try:
-            #把这个grid从cluster中移除
-            cluster_object=self.cluster_manager.getCluster(grid_object.key())
-            cluster_object.delGrid(grid_object.key())
-        except KeyError:
-            print("__adjust_sparse:grid_object not exist in cluster")
+        #把这个grid从cluster中移除
+        cluster_object=self.cluster_manager.getCluster(grid_object.clusterKey())
+        cluster_object.delGrid(grid_object)
+        if not cluster_object.isClusterSingle():
+            self.cluster_manager.splitCluster(cluster_object.key())
 
 
-            #判断被删除grid的cluster有没有被分离成两个cluster若有，进行处理
-            if not cluster_object.isClusterSingle():
-                self.cluster_manager.splitCluster(cluster_object.key())
 #=================================================
 
     def __adjust_dense_neighbor_dense(self,grid_object,grid_h_object):
@@ -64,9 +60,9 @@ class D_Stream:
 
         #如果g已经有cluster且他的cluseter比h大，那么吞并h的cluster，否则反向吞并
         elif not -1==grid_object.clusterKey():
-            grid_cluster_object=self.cluster_manager.getCluster(grid_object.key())
-            grid_h_cluster_object=self.cluster_manager.getCluster(grid_h_object.key())
-            if grid_cluster_object.size()>grid_h_cluster_object.size:
+            grid_cluster_object=self.cluster_manager.getCluster(grid_object.clusterKey())
+            grid_h_cluster_object=self.cluster_manager.getCluster(grid_h_object.clusterKey())
+            if grid_cluster_object.size()>grid_h_cluster_object.size():
                 self.cluster_manager.mergeCluster(grid_cluster_object.key(),grid_h_cluster_object.key())
             else:
                 self.cluster_manager.mergeCluster(grid_h_cluster_object.key(),grid_cluster_object.key())
@@ -76,13 +72,13 @@ class D_Stream:
     def __adjust_dense_neighbor_transitional(self,grid_object,grid_h_object):
         # 拿h的cluster
         grid_h_cluster_object = self.cluster_manager.getCluster(grid_h_object.clusterKey())
-        grid_h_cluster_object.addGrid(grid_object)
         if -1==grid_object.clusterKey():
+            grid_h_cluster_object.addGrid(grid_object)
             #把grid加到h的cluster里并判断此时h是不是outside,如果不是再把grid拿出来
             if not grid_h_cluster_object.isOutsideGrid(grid_h_object):
                 grid_h_cluster_object.delGrid(grid_object)
         else:
-            grid_cluster_object = self.cluster_manager.getCluster(grid_object.key())
+            grid_cluster_object = self.cluster_manager.getCluster(grid_object.clusterKey())
             #grid易主
             if grid_cluster_object.size()>=grid_h_cluster_object.size():
                 grid_h_cluster_object.delGrid(grid_h_object)
@@ -105,7 +101,7 @@ class D_Stream:
                     max_size=cluster.size()
                     grid_h_object=item
             except KeyError:
-                print("__adjust_dense:KeyError:cannot find the cluster of this grid，there are some problem in your code")
+                print("__adjust_dense:KeyError:this grid has not cluster")
 
 
         #如果这个if触发，说明neighbor都是没有cluster的

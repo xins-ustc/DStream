@@ -30,14 +30,15 @@ class TestDStream(unittest.TestCase):
         g._Grid__key=key
         cluster.addGrid(g)
         keys = Helper.getNeighborKeys(key)
+        grid=None
         for k in keys:
             grid=Grid()
             grid._Grid__key=k
             cluster.addGrid(grid)
-        manager=dstream._D_Stream__cluster_manager
+        manager=dstream.cluster_manager
         manager._ClusterManager__cluster_key_index=1
         manager._ClusterManager__cluster_dic[1]=cluster
-        dstream._D_Stream__adjust_sparse(g)
+        dstream._D_Stream__adjust_sparse(grid)
         self.assertEqual(1,len(manager._ClusterManager__cluster_dic))
         #被删除的grid存在且删除grid后不是single
         cluster = Cluster(1)
@@ -51,7 +52,7 @@ class TestDStream(unittest.TestCase):
         grid = Grid()
         grid._Grid__key = '1998232137'
         cluster.addGrid(grid)
-        manager = dstream._D_Stream__cluster_manager
+        manager = dstream.cluster_manager
         manager._ClusterManager__cluster_key_index = 1
         manager._ClusterManager__cluster_dic[1] = cluster
         dstream._D_Stream__adjust_sparse(g)
@@ -59,9 +60,10 @@ class TestDStream(unittest.TestCase):
     def test_adjust_dense_neighbor_dense(self):
         dstream = D_Stream()
         manager=dstream.cluster_manager
-        #建立一个dense grid和一个邻居gird_h，grid_h是dense且grid的cluster不存在，验证是否g会在h的cluster里
+        #建立一个dense grid和一个邻居gird_h，grid_h是dense且grid的cluster不存在，验证g会在h的cluster里
         g=Grid()
         g._Grid__key='1001001001'
+        g._Grid__densityStatus = DensityStatus.DENSE
         h=Grid()
         h._Grid__key='1002001001'
         h._Grid__densityStatus=DensityStatus.DENSE
@@ -69,8 +71,12 @@ class TestDStream(unittest.TestCase):
         dstream._D_Stream__adjust_dense_neighbor_dense(g,h)
         cluster=manager.getCluster(1)
         self.assertEqual(len(cluster.getAllGrids()),2)
-        h1=cluster.getGrid('456')
-        self.assertEqual(h1.key(),'456')
+        h1=cluster.getGrid('1001001001')
+        self.assertEqual(h1.key(),'1001001001')
+
+
+
+
         #建立一个dense grid和一个邻居gird_h，g的cluster比h的大，验证h的cluster被g吞并
         dstream = D_Stream()
         manager = dstream.cluster_manager
@@ -90,9 +96,10 @@ class TestDStream(unittest.TestCase):
         cluster_g.addGrid(g2)
         dstream._D_Stream__adjust_dense_neighbor_dense(g, h)
         self.assertEqual(1,len(manager.getAllCluster()))
-        clu=manager.getAllCluster()
+        clu=manager.getCluster(1)
         gs=clu.getAllGrids()
-        for grid in gs:
+        for k in gs:
+            grid=gs[k]
             self.assertIn(grid.key(),['1002001001','1003001001','1004001001','1003002001'])
         #建立一个dense grid和一个邻居gird_h，h的cluster比g大，验证g的cluster 被h吞并
         dstream = D_Stream()
@@ -113,9 +120,10 @@ class TestDStream(unittest.TestCase):
         cluster_h.addGrid(h2)
         dstream._D_Stream__adjust_dense_neighbor_dense(g, h)
         self.assertEqual(1, len(manager.getAllCluster()))
-        clu = manager.getAllCluster()
+        clu = manager.getCluster(2)
         gs = clu.getAllGrids()
-        for grid in gs:
+        for k in gs:
+            grid=gs[k]
             self.assertIn(grid.key(), ['1002001001', '1003001001', '1004001001', '1003002001'])
 
     def test_adjust_dense_neighbor_transitional(self):
@@ -125,6 +133,7 @@ class TestDStream(unittest.TestCase):
         g=Grid()
         g._Grid__densityStatus=DensityStatus.DENSE
         g._Grid__key='1000100100'
+        manager
         h=Grid()
         h._Grid__key='1001100100'
         manager.addNewCluster(h)
@@ -175,20 +184,23 @@ class TestDStream(unittest.TestCase):
         g = Grid()
         g._Grid__densityStatus = DensityStatus.DENSE
         g._Grid__key = '1000100100'
+        dstream.grid_list._GridList__grid_list[g.key()]=g
         h = Grid()
         h._Grid__key = '1001100100'
+        dstream.grid_list._GridList__grid_list[h.key()] = h
         manager.addNewCluster(g)
         manager.addNewCluster(h)
         cluster1=manager.getCluster(1)
         g1=Grid()
         g1._Grid__key='1241241'
         cluster1.addGrid(g1)
+        dstream.grid_list._GridList__grid_list[g1.key()] = g1
         dstream._D_Stream__adjust_dense_neighbor_transitional(g, h)
-        self.assertEqual(len(cluster1),3)
         grids=cluster1.getAllGrids()
-        for g in grids:
+        for k in grids:
+            g=grids[k]
             self.assertIn(g.key(),['1000100100','1001100100','1241241'])
-        self.assertEqual(1,len(manager.getAllCluster()))
+
 
 
     def test_adjust_dense(self):
