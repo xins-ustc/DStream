@@ -101,7 +101,7 @@ class D_Stream:
                     max_size=cluster.size()
                     grid_h_object=item
             except KeyError:
-                print("__adjust_dense:KeyError:this grid has not cluster")
+                print("__adjust_dense:INFO:this grid has not cluster")
 
 
         #如果这个if触发，说明neighbor都是没有cluster的
@@ -167,7 +167,13 @@ class D_Stream:
             change_flag=0
             #遍历clusters，拿到每个clusters的set
             all_clusters=self.cluster_manager.getAllCluster()
-            for cluster in all_clusters:
+            keys=list(all_clusters.keys())
+            for k in keys:
+                cluster=None
+                if k in all_clusters:
+                    cluster=all_clusters[k]
+                else:
+                    continue
                 #找到属于outside的grid
                 outside_grids=cluster.getOutsideGrids()
                 for outside_grid in outside_grids:
@@ -175,20 +181,26 @@ class D_Stream:
                     neighbor_grids=self.grid_list.getNeighborGrids(outside_grid.key())
                     for neighbor_grid in neighbor_grids:
                         #若outside的grid所在cluster的尺度大于neighboring的grid，则吞并neighboring的cluster，同时change_flag++
-                        neighbor_cluster=self.cluster_manager.getCluster(neighbor_grid.key())
-                        if not neighbor_cluster==None:
+                        try:
+                            neighbor_cluster=self.cluster_manager.getCluster(neighbor_grid.clusterKey())
+                            if cluster.key()==neighbor_cluster.key():
+                                #如果两个key一样，则不需要执行
+                                continue
                             if cluster.size()>neighbor_cluster.size():
                                 self.cluster_manager.mergeCluster(cluster.key(),neighbor_cluster.key())
                                 change_flag+=1
                             else:
                                 self.cluster_manager.mergeCluster(neighbor_cluster.key(),cluster.key())
                                 change_flag+=1
-                        #否则反向吞并，同时change_flag++
-                        elif neighbor_grid.densityStatus()==DensityStatus.TRANSITIONAL:
+                        except KeyError:
+                            # 否则反向吞并，同时change_flag++
+                            if neighbor_grid.densityStatus() == DensityStatus.TRANSITIONAL:
                                 cluster.addGrid(neighbor_grid)
-                                change_flag+=1
+                                change_flag += 1
+
+
             #while停止
-            if not 0==change_flag:
+            if 0==change_flag:
                 stop_flag=1
 
     def __adjust_clustring(self):
@@ -234,7 +246,7 @@ class D_Stream:
             self.__initial_clustring()
         if self.tc%self.gap == 0:
             #判断sporadic的状态并删除符合条件的grid
-            self.grid_list.judgeAndremoveSporadic()
+            self.grid_list.judgeAndremoveSporadic(self.tc)
             self.__adjust_clustring()
         #清空change为0
         self.grid_list.clearChangeFlag()

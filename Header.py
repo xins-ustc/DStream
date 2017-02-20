@@ -34,7 +34,7 @@ class RawData:
     #======可选参数===========
     #以下参数是程序辅助使用，和算法无关
     toa=0
-    cluster=0
+    cluster=0;
 
     def __init__(self,PW,RF,DOA):
         self.DOA=DOA

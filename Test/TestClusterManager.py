@@ -90,6 +90,12 @@ class TestClusterManager(unittest.TestCase):
 
 
     def test_mergeCluster(self):
+        manager = ClusterManager()
+        cluster1 = Cluster(1)
+        manager._ClusterManager__cluster_key_index+=1
+        manager._ClusterManager__cluster_dic[1]=cluster1
+
+        self.assertEqual(-1,manager.mergeCluster(1,1))
         #检查merge是否正确
             #建3个cluster。然后调用函数。源cluster包含全部grid，目标cluster不存在
         manager=ClusterManager()
@@ -148,7 +154,16 @@ class TestClusterManager(unittest.TestCase):
 
         self.assertEqual(2,len(manager._ClusterManager__cluster_dic))
 
-
+    # def test_clearEmptyCluster(self):
+    #     manager=ClusterManager()
+    #     manager._ClusterManager.__cluster_dic[1]=Cluster()
+    #     c=Cluster(2)
+    #     g=Grid()
+    #     c.addGrid(g)
+    #     manager._ClusterManager.__cluster_dic[2]=c
+    #     self.assertEqual(2,len(manager.getAllCluster()))
+    #     manager.clearEmptyCluseter()
+    #     self.assertEqual(1,len(manager.getAllCluster()))
 
 if __name__ =="__main__":
     unittest.main()

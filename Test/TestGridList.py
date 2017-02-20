@@ -265,8 +265,7 @@ class TestGridList(unittest.TestCase):
             grid._Grid__time_update = time
             grid._Grid__density = (grid.densityThreshold(time) / (Helper().lamb)) * Helper().lamb
             grid._Grid__density += i
-            print("d:",grid.densityWithTime(time))
-            print("TH:",grid.densityThreshold(time))
+
             assert grid.densityThreshold(time) < grid.densityWithTime(time)
         for i in range(12, 15):
             k = keys[i]
@@ -279,8 +278,7 @@ class TestGridList(unittest.TestCase):
             grid._Grid__time_update=time
             grid._Grid__density=(grid.densityThreshold(time)/(Helper().lamb))*Helper().lamb
             grid._Grid__density+=i
-            print("d:", grid.densityWithTime(time))
-            print("TH:", grid.densityThreshold(time))
+
             assert grid.densityThreshold(time) < grid.densityWithTime(time)
         #======s1 and s2===============
         for i in range(15, 18):
@@ -290,14 +288,12 @@ class TestGridList(unittest.TestCase):
             grid._Grid__sparseStatus = SparseStatus.TEMP
             # 使符合s2，公式同上（s2需要修改time_remove,而s1中的Th需要用到time_remove,顾先改s2）
             grid._Grid__time_remove=time/(1+Helper().beta)-i
-            print('left:',time,"right:",(1 + Helper().beta) * grid.time_remove())
+
             assert time >= (1 + Helper().beta) * grid.time_remove()
             #使符合s1，公式是自己推导出来的
 
             grid._Grid__time_update = time
             grid._Grid__density = (grid.densityThreshold(time) / (Helper().lamb)) / 2
-            print("d1:", grid.densityWithTime(time))
-            print("TH1:", grid.densityThreshold(time))
             assert grid.densityThreshold(time) > grid.densityWithTime(time)
         for i in range(18, 21):
             k = keys[i]

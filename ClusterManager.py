@@ -47,7 +47,8 @@ class ClusterManager:
             raise Exception("ClusterManager mergeCluster:source_key不存在",source_key)
         if not target_key in self.__cluster_dic:
             raise Exception("ClusterManager mergeCluster:target_key不存在", target_key)
-
+        if source_key==target_key:
+            return -1
         source_cluster=  self.__cluster_dic[source_key]
         target_cluster = self.__cluster_dic[target_key]
 
@@ -60,6 +61,14 @@ class ClusterManager:
         #删除cluster
         self.__cluster_dic.pop(target_key)
 
+    # def clearEmptyCluseter(self):
+    #     keys_toremove=[]
+    #     for k in self.__cluster_dic:
+    #         cluster=self.__cluster_dic[k]
+    #         if cluster.size()==0:
+    #             keys_toremove.append(k)
+    #     for k in keys_toremove:
+    #         self.__cluster_dic.pop(k)
 
     #切分cluster
     def splitCluster(self,cluster_key):

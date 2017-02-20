@@ -95,6 +95,7 @@ class TestDStream(unittest.TestCase):
         cluster_g.addGrid(g1)
         cluster_g.addGrid(g2)
         dstream._D_Stream__adjust_dense_neighbor_dense(g, h)
+
         self.assertEqual(1,len(manager.getAllCluster()))
         clu=manager.getCluster(1)
         gs=clu.getAllGrids()
@@ -361,40 +362,39 @@ class TestDStream(unittest.TestCase):
     def test_initial_clustring(self):
         #1、布置100个不是neighbor的grid，运行函数不会报错
         dstream=D_Stream()
-        key='100100'
+        k='100100'
         for i in range(1,100):
-            k=int(key)+3000000
+            k=int(k)+3000000
             g=Grid()
             g._Grid__key=str(k)
             dstream.grid_list._GridList__grid_list[k]=g
         dstream._D_Stream__initial_clustring()
+        k='100100'
         for i in range(1,100):
-            k=int(key)+3000000
+            k=int(k)+3000000
             grid=dstream.grid_list._GridList__grid_list[k]
             self.assertEqual(grid.clusterKey(),-1)
 
         #1-2、其中50个是dense，25个transitional，25个sparse，检查50个被分入各自cluster，但是其他50个没有cluster
         dstream = D_Stream()
-        key = '100100'
-        index=0
+        k = '100100'
         for i in range(1, 100):
-            index+=1
-            k = int(key) + 3000000
+            k = str(int(k) + 3000000)
             g = Grid()
-            g._Grid__key = str(k)
+            g._Grid__key = k
             dstream.grid_list._GridList__grid_list[k] = g
-            if index<50:
+            if i<50:
                 g._Grid__densityStatus=DensityStatus.DENSE
-            elif index<75:
+            elif i<75:
                 g._Grid__densityStatus = DensityStatus.TRANSITIONAL
             else:
                 g._Grid__densityStatus = DensityStatus.SPARSE
         dstream._D_Stream__initial_clustring()
+        k = '100100'
         for i in range(1, 100):
-            index+=1
-            k = int(key) + 3000000
+            k = str(int(k) + 3000000)
             grid=dstream.grid_list._GridList__grid_list[k]
-            if index < 50:
+            if i < 50:
                 self.assertNotEqual(-1,grid.clusterKey())
             else:
                 self.assertEqual(-1, grid.clusterKey())
@@ -403,103 +403,121 @@ class TestDStream(unittest.TestCase):
         #2、10个互相隔离的cluster，运行函数后10个cluster没有变化
         dstream = D_Stream()
         index=0
-        k='100100'
+        key='100100'
         for i in range(0,10):
             index+=1
-            cluster=Cluster(index)
-            dstream.cluster_manager._ClusterManager__cluster_dic[index]=cluster
-            dstream.cluster_manager._ClusterManager__cluster_key_index+=1
-            key=str(int(k)+5000000)
+            key=str(int(key)+5000000)
             g=Grid()
             g._Grid__key=key
-            cluster.addGrid(g)
+            g._Grid__densityStatus=DensityStatus.DENSE
             dstream.grid_list._GridList__grid_list[key]=g
             n_keys=Helper.getNeighborKeys(key)
             for n_key in n_keys:
                 n_grid=Grid()
                 n_grid._Grid__key=n_key
-                cluster.addGrid(n_grid)
-                dstream.grid_list._GridList__grid_list[n_keys]=n_grid
+                n_grid._Grid__densityStatus=DensityStatus.TRANSITIONAL
+                dstream.grid_list._GridList__grid_list[n_key]=n_grid
         dstream._D_Stream__initial_clustring()
         clusters=dstream.cluster_manager.getAllCluster()
-        for cluster in clusters:
+        for k in clusters:
+            cluster=clusters[k]
             self.assertEqual(7,cluster.size())
         self.assertEqual(10,len(clusters))
 
+
         #3、5个cluster，其中1和2接壤，1被2吞并，3和4接壤，4被3吞并、4的邻居有一个transitional的grid 5 ，被4吞并
         dstream = D_Stream()
-        cluster=Cluster(1)
+
         g=Grid()
         g._Grid__key='100100'
-        cluster.addGrid(g)
-        dstream.grid_list._GridList__grid_list[g.key()]=g
-        dstream.cluster_manager._ClusterManager__cluster_dic[1]=cluster
-        dstream.cluster_manager._ClusterManager__cluster_key_index+=1
+        g._Grid__densityStatus=DensityStatus.DENSE
 
-        cluster=Cluster(2)
+        dstream.grid_list._GridList__grid_list[g.key()]=g
+
+
+
         g=Grid()
         g._Grid__key='1100100'
-        cluster.addGrid(g)
+        g._Grid__densityStatus=DensityStatus.DENSE
+
         g1=Grid()
         g1._Grid__key='1100101'
-        cluster.addGrid(g1)
+        g1._Grid__densityStatus=DensityStatus.TRANSITIONAL
+
         g2 = Grid()
         g2._Grid__key = '1100102'
-        cluster.addGrid(g2)
+        g2._Grid__densityStatus=DensityStatus.TRANSITIONAL
+
+        g3 = Grid()
+        g3._Grid__key = '1100103'
+        g3._Grid__densityStatus = DensityStatus.TRANSITIONAL
+
         dstream.grid_list._GridList__grid_list[g.key()] = g
         dstream.grid_list._GridList__grid_list[g1.key()] = g1
-        dstream.cluster_manager._ClusterManager__cluster_dic[2] = cluster
-        dstream.cluster_manager._ClusterManager__cluster_key_index += 1
+        dstream.grid_list._GridList__grid_list[g2.key()] = g2
+        dstream.grid_list._GridList__grid_list[g3.key()] = g3
 
-        cluster = Cluster(3)
+
+
+
         g = Grid()
         g._Grid__key = '1000100100'
-        cluster.addGrid(g)
+        g._Grid__densityStatus=DensityStatus.DENSE
+
         g1 = Grid()
-        g1._Grid__key = '1001100101'
-        cluster.addGrid(g1)
+        g1._Grid__key = '1001100100'
+        g1._Grid__densityStatus=DensityStatus.TRANSITIONAL
+
         dstream.grid_list._GridList__grid_list[g.key()] = g
         dstream.grid_list._GridList__grid_list[g1.key()] = g1
-        dstream.cluster_manager._ClusterManager__cluster_dic[3] = cluster
-        dstream.cluster_manager._ClusterManager__cluster_key_index += 1
 
-        dstream = D_Stream()
-        cluster = Cluster(4)
+
+
+
+
         g = Grid()
-        g._Grid__key = '1002100100'
-        cluster.addGrid(g)
+        g._Grid__key = '999100100'
+        g._Grid__densityStatus=DensityStatus.DENSE
+
         dstream.grid_list._GridList__grid_list[g.key()] = g
-        dstream.cluster_manager._ClusterManager__cluster_dic[4] = cluster
-        dstream.cluster_manager._ClusterManager__cluster_key_index += 1
+
 
 
         h=Grid()
-        h._Grid__key='1003100100'
-        dstream.grid_list._GridList__grid_list[h.key()] = g
+        h._Grid__key='1002100100'
+        dstream.grid_list._GridList__grid_list[h.key()] = h
+        h._Grid__densityStatus=DensityStatus.TRANSITIONAL
 
         dstream._D_Stream__initial_clustring()
             #运行函数后，只剩下两个cluster
         clusters=dstream.cluster_manager.getAllCluster()
         self.assertEqual(2,len(clusters))
 
-        cluster2=dstream.cluster_manager.getCluster(2)
-        cluster4=dstream.cluster_manager.getCluster(4)
+        cluster2=None
+        cluster4=None
+        for k in clusters:
+            c=clusters[k]
+            if c.size()==5:
+                cluster2=c
+            else :
+                cluster4=c
+
         grids=cluster2.getAllGrids()
-        for grid in grids:
-            self.assertIn(grid.key(),['100100','1100100','1100100','1100102'])
+        for k in grids:
+            self.assertIn(k,['100100','1100100','1100101','1100102','1100103'])
         grids=cluster4.getAllGrids()
-        for grid in grids:
-            self.assertIn(grid.key(),['1000100100','1000100100','1002100100','1003100100'])
+        for k in grids:
+            self.assertIn(k,['1000100100','1001100100','999100100','1002100100'])
 
 
-    def test_do_DStream(self):
-        #两个gap的数据量来做覆盖测试
-        dstream=D_Stream()
-        gap=Helper().gap()
-        for i in range(0,2*gap):
-            raw=HelperForTest.randomLegalRawData()
-            dstream.do_DStream(raw)
-        self.assertEqual(2*gap,dstream.tc)
+    # def test_do_DStream(self):
+    #     #两个gap的数据量来做覆盖测试
+    #     dstream=D_Stream()
+    #     gap=Helper().gap()
+    #     for i in range(0,2*gap):
+    #         raw=HelperForTest.randomLegalRawData()
+    #         dstream.do_DStream(raw)
+    #     self.assertEqual(2*gap,dstream.tc)
 
 if __name__ =="__main__":
     unittest.main()
