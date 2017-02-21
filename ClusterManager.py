@@ -25,13 +25,14 @@ class ClusterManager:
         self.__cluster_dic[self.__cluster_key_index]=cluster
 
     #返回某grid的neighboring的cluster数组
+    #不要找自己
     def getNeighborClusters(self,grid_object):
         ret_clusters=[]
         keys=Helper.getNeighborKeys(grid_object.key())
         for k in self.__cluster_dic:
             cluster=self.__cluster_dic[k]
-            for k in keys:
-                if cluster.isGridExistWithKey(k):
+            for k1 in keys:
+                if cluster.isGridExistWithKey(k1) and cluster.key()!=grid_object.clusterKey():
                     ret_clusters.append(cluster)
                     continue
         return ret_clusters

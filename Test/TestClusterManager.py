@@ -43,6 +43,8 @@ class TestClusterManager(unittest.TestCase):
         self.assertEqual(manager._ClusterManager__cluster_key_index,2)
         clusters=manager.getAllCluster()
         self.assertEqual(len(clusters),2)
+        self.assertEqual(1,grid1.clusterKey())
+        self.assertEqual(2,grid2.clusterKey())
 
 
     def test_getNeighborClusters(self):
@@ -68,8 +70,17 @@ class TestClusterManager(unittest.TestCase):
 
 
 
-
-
+        #添加一个grid，grid属于本cluster，不会get到自己
+        manager = ClusterManager()
+        g=Grid()
+        g._Grid__key='1001100100'
+        manager.addNewCluster(g)
+        cluster=manager.getCluster(1)
+        g1=Grid()
+        g1._Grid__key="1002100100"
+        cluster.addGrid(g1)
+        clusters=manager.getNeighborClusters(g)
+        self.assertEqual(0,len(clusters))
 
 
     def test_getAllCluster(self):

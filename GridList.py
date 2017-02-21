@@ -6,6 +6,9 @@ class GridList:
     def __init__(self):
         self.__grid_list={}
 
+    def size(self):
+        return len(self.__grid_list)
+
     def getGrid(self,grid_key):
         #注意！：若grid被remove，因为算法原因并没有从dic中删除，所以之前被删除的grid也会存在于
         if not grid_key in self.__grid_list:
@@ -51,6 +54,16 @@ class GridList:
             if DensityStatus.DENSE==grid.densityStatus():
                 ret.append(grid)
         return ret
+
+    def getSparseGrids(self):
+        ret=[]
+        for k in self.__grid_list:
+            grid=self.__grid_list[k]
+            if DensityStatus.SPARSE==grid.densityStatus():
+                ret.append(grid)
+        return ret
+
+
     #拿到标记change的grid
     def getChangeGrids(self):
         ret=[]
@@ -67,6 +80,7 @@ class GridList:
         if not grid_key in self.__grid_list:
             raise KeyError("grid_list没有这个key,删除失败")
         else:
+            # 删除(由于paper中提到保留tg即time_remove，所以不从grid_list中删除，而是只清空数据，并记录time_remove)
             #清空密度信息,只记录__time_remove
             grid_object=self.__grid_list[grid_key]
             grid_object.clear()
@@ -79,22 +93,5 @@ class GridList:
             grid_object.resetChangeFlag()
 
 
-    #进入sporadic删除判定逻辑,处理所有grid
-    def judgeAndremoveSporadic(self,current_time):
-        for k in self.__grid_list:
-            grid_object = self.__grid_list[k]
-            if DensityStatus.SPARSE==grid_object.densityStatus():
-                if SparseStatus.TODELETE==grid_object.sparseStatus():
-                    #删除(由于paper中提到保留tg即time_remove，所以不从grid_list中删除，而是只清空数据，并记录time_remove)
-                    grid_object.clear()
-                    grid_object.setRemoveTime(current_time)
-                elif SparseStatus.TEMP==grid_object.sparseStatus() or SparseStatus.NORMAL==grid_object.sparseStatus():
-                    #判断s1和s2
-                    if grid_object.densityThreshold(current_time)>grid_object.densityWithTime(current_time) and current_time>=(1+Helper().beta)*grid_object.time_remove():
-                        #符合s1,s2 放给TODELETE
-                        grid_object.setSparseStatus(SparseStatus.TODELETE)
-                    else:
-                        #回NORMAL
-                        grid_object.setSparseStatus(SparseStatus.NORMAL)
 
 

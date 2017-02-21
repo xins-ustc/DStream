@@ -519,5 +519,175 @@ class TestDStream(unittest.TestCase):
     #         dstream.do_DStream(raw)
     #     self.assertEqual(2*gap,dstream.tc)
 
+
+    def test_judgeAndremoveSporadic(self):
+        #case1:list中没有Sparse的grid，调用后检查各个grid的状态的remove_time，没有变化且gird的数量没有变化
+        d=D_Stream()
+        # gridList=GridList()
+        self.assertEqual(0,len(d.grid_list._GridList__grid_list))
+        time=0
+        for i in range(1,100):
+            time+=random.randint(1,10000)
+            raw=HelperForTest.randomLegalRawData()
+            key=Helper.getKeyFromRawData(raw)
+            g=Grid()
+            g.addData(raw,time)
+            g._Grid__densityStatus=DensityStatus.DENSE
+            d.grid_list._GridList__grid_list[key]=g
+        d.judgeAndremoveSporadic(time+random.randint(1,10000))
+        length=len(d.grid_list._GridList__grid_list)
+        for k in d.grid_list._GridList__grid_list:
+            grid=d.grid_list._GridList__grid_list[k]
+            self.assertEqual(grid._Grid__time_remove,0)
+            self.assertEqual(len(d.grid_list._GridList__grid_list),length)
+
+        #case2：list中有Sparse，Dense和Transitional，调用后，Dense和Transitional的数量不变，
+                # Sparse的数量也不变，且Sparse中TODELETE的状态全部被处理
+                # 3个3个TODELETE，3个符合s1但不符合s2的NORMAL和3个同类TEMP，3个符合s2但不符合s1的NORMAL和同类TEMP,3个符合s1和s2的TEMP，3个符合s1和s2的NORMAL
+        # d.grid_list = GridList()
+        d = D_Stream()
+        for i in range(1, 1000):
+            time += random.randint(1, 10000)
+            raw = HelperForTest.randomLegalRawData()
+            key = Helper.getKeyFromRawData(raw)
+            g = Grid()
+            g.addData(raw, time)
+            g._Grid__densityStatus = DensityStatus.DENSE
+            d.grid_list._GridList__grid_list[key] = g
+        #由于是随机生成的，有可能重复，所以未必就是1000个
+        time+=1
+        length=len(d.grid_list._GridList__grid_list)
+        keys=list(d.grid_list._GridList__grid_list.keys())
+        #3 TODELETE
+        for i in range(0,3):
+            k=keys[i]
+            grid=d.grid_list.getGrid(k)
+            grid._Grid__densityStatus=DensityStatus.SPARSE
+            grid._Grid__sparseStatus=SparseStatus.TODELETE
+        #===============3 s1 not s2 NORMAL====================
+        #s1:grid_object.densityThreshold()>grid_object.density(current_time)
+        #s2:current_time>=(1+Helper().beta)*grid_object.time_remove()
+        for i in range(3, 6):
+            k = keys[i]
+
+            grid = d.grid_list.getGrid(k)
+            grid._Grid__densityStatus = DensityStatus.SPARSE
+            grid._Grid__sparseStatus = SparseStatus.NORMAL
+            # 使不符合s2，公式同上（s2需要修改time_remove,而s1中的Th需要用到time_remove,顾先改s2）
+            grid._Grid__time_remove=time/(1+Helper().beta)+i
+            #使符合s1，公式是自己推导出来的
+            if not Helper().lamb**(time-grid._Grid__time_update)==0:
+                grid._Grid_density=grid.densityThreshold(time)/(Helper().lamb**(time-grid._Grid__time_update))-i
+
+
+        for i in range(6, 9):
+            k = keys[i]
+            grid = d.grid_list.getGrid(k)
+            grid._Grid__densityStatus = DensityStatus.SPARSE
+            grid._Grid__sparseStatus = SparseStatus.TEMP
+            # 使不符合s2，公式同上（s2需要修改time_remove,而s1中的Th需要用到time_remove,顾先改s2）
+            grid._Grid__time_remove=time/(1+Helper().beta)+i
+            #使符合s1，公式是自己推导出来的
+            if not Helper().lamb**(time-grid._Grid__time_update)==0:
+                grid._Grid_density=grid.densityThreshold(time)/(Helper().lamb**(time-grid._Grid__time_update))-i
+        #=================s2 not s1===================
+        for i in range(9, 12):
+            k = keys[i]
+            grid = d.grid_list.getGrid(k)
+            grid._Grid__densityStatus = DensityStatus.SPARSE
+            grid._Grid__sparseStatus = SparseStatus.NORMAL
+            # 使符合s2，公式同上（s2需要修改time_remove,而s1中的Th需要用到time_remove,顾先改s2）
+            grid._Grid__time_remove=time/(1+Helper().beta)-i
+            #使不符合s1，公式是自己推导出来的
+            grid._Grid__time_update = time
+            grid._Grid__density = (grid.densityThreshold(time) / (Helper().lamb)) * Helper().lamb
+            grid._Grid__density += i
+
+            assert grid.densityThreshold(time) < grid.densityWithTime(time)
+        for i in range(12, 15):
+            k = keys[i]
+            grid = d.grid_list.getGrid(k)
+            grid._Grid__densityStatus = DensityStatus.SPARSE
+            grid._Grid__sparseStatus = SparseStatus.TEMP
+            # 使符合s2，公式同上（s2需要修改time_remove,而s1中的Th需要用到time_remove,顾先改s2）
+            grid._Grid__time_remove=time/(1+Helper().beta)-i
+            #使不符合s1，公式是自己推导出来的
+            grid._Grid__time_update=time
+            grid._Grid__density=(grid.densityThreshold(time)/(Helper().lamb))*Helper().lamb
+            grid._Grid__density+=i
+
+            assert grid.densityThreshold(time) < grid.densityWithTime(time)
+        #======s1 and s2===============
+        for i in range(15, 18):
+            k = keys[i]
+            grid = d.grid_list.getGrid(k)
+            grid._Grid__densityStatus = DensityStatus.SPARSE
+            grid._Grid__sparseStatus = SparseStatus.TEMP
+            # 使符合s2，公式同上（s2需要修改time_remove,而s1中的Th需要用到time_remove,顾先改s2）
+            grid._Grid__time_remove=time/(1+Helper().beta)-i
+
+            assert time >= (1 + Helper().beta) * grid.time_remove()
+            #使符合s1，公式是自己推导出来的
+
+            grid._Grid__time_update = time
+            grid._Grid__density = (grid.densityThreshold(time) / (Helper().lamb)) / 2
+            assert grid.densityThreshold(time) > grid.densityWithTime(time)
+        for i in range(18, 21):
+            k = keys[i]
+            grid = d.grid_list.getGrid(k)
+            grid._Grid__densityStatus = DensityStatus.SPARSE
+            grid._Grid__sparseStatus = SparseStatus.NORMAL
+            # 使符合s2，公式同上（s2需要修改time_remove,而s1中的Th需要用到time_remove,顾先改s2）
+            grid._Grid__time_remove=time/(1+Helper().beta)-i
+            assert time >= (1 + Helper().beta) * grid.time_remove()
+            #使符合s1，公式是自己推导出来的
+
+            grid._Grid__time_update = time
+            grid._Grid__density = (grid.densityThreshold(time) / (Helper().lamb)) / 2
+            assert grid.densityThreshold(time) > grid.densityWithTime(time)
+        #被归入
+        d.judgeAndremoveSporadic(time)
+        #case1：3个TODELTE被删除
+        for i in range(0,3):
+            key=keys[i]
+            grid=d.grid_list._GridList__grid_list[key]
+            self.assertEqual(grid.sparseStatus(),SparseStatus.NORMAL)
+            self.assertEqual(grid.time_remove(),time)
+            self.assertEqual(grid.density(),0)
+            self.assertEqual(grid.clusterKey(),-1)
+            self.assertEqual(grid._Grid__change,0)
+        #case2:3-15的grid依然是NORMAL
+        for i in range(3,15):
+            key = keys[i]
+            grid = d.grid_list.getGrid(key)
+            self.assertGreater(grid.density(),0)
+            self.assertEqual(grid.sparseStatus(),SparseStatus.NORMAL)
+            self.assertEqual(grid.densityStatus(),DensityStatus.SPARSE)
+        for i in range(15,21):
+            key = keys[i]
+            grid = d.grid_list.getGrid(key)
+            self.assertEqual(grid.sparseStatus(),SparseStatus.TODELETE)
+            self.assertEqual(grid.densityStatus(),DensityStatus.SPARSE)
+            self.assertNotEqual(grid.density(),0)
+            self.assertNotEqual(grid.time_remove(),time)
+
+        #case3: 被判断要删除的grid，检查其不在gridlist和cluster里面
+        d = D_Stream()
+        #grid作为sparse和todelete，被删除且，cluster里找不到它
+        raw=HelperForTest.randomLegalRawData()
+        key=Helper.getKeyFromRawData(raw)
+        d.grid_list.addNewData(raw,1)
+        g=d.grid_list.getGrid(key)
+        d.cluster_manager.addNewCluster(g)
+        g._Grid__densityStatus = DensityStatus.SPARSE
+        g._Grid__sparseStatus = SparseStatus.TODELETE
+        d.judgeAndremoveSporadic(2)
+        self.assertEqual(g.clusterKey(),-1)
+        self.assertEqual(0,g.density())
+        clusters=d.cluster_manager.getAllCluster()
+        for k in clusters:
+            cluster=clusters[k]
+            self.assertEqual(0,cluster.size())
+
 if __name__ =="__main__":
     unittest.main()

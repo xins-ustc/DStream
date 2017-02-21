@@ -101,7 +101,8 @@ class D_Stream:
                     max_size=cluster.size()
                     grid_h_object=item
             except KeyError:
-                print("__adjust_dense:INFO:this grid has not cluster")
+                #print("__adjust_dense:INFO:this grid has not cluster")
+                a=1
 
 
         #如果这个if触发，说明neighbor都是没有cluster的
@@ -112,12 +113,10 @@ class D_Stream:
 
         #如果这个h是一个dense
         if DensityStatus.DENSE==grid_h_object.densityStatus():
-
             self.__adjust_dense_neighbor_dense(grid_object,grid_h_object)
 
         #如果h是一个transitinal，
         elif DensityStatus.TRANSITIONAL==grid_h_object.densityStatus():
-
             self.__adjust_dense_neighbor_transitional(grid_object,grid_h_object)
 
         return 0
@@ -131,7 +130,7 @@ class D_Stream:
     def __adjust_transitional(self,grid_object):
 
         neighbor_clusters=self.cluster_manager.getNeighborClusters(grid_object)
-    #在neighbor的grid中找出一个cluster，这个cluster最大且当g加入以后g师outside
+    #在neighbor的grid中找出一个cluster，这个cluster最大且当g加入以后g是outside
         the_ret_cluster_key=0
         the_ret_cluster_size=0
         for cluster in neighbor_clusters:
@@ -204,6 +203,13 @@ class D_Stream:
                 stop_flag=1
 
     def __adjust_clustring(self):
+        #=======(这一步论文里没讲清楚，自己加上去的)============把所有的dense的grid设置为单独的cluster
+        dense_grids=self.grid_list.getDenseGrids()
+        for grid in dense_grids:
+            if grid.clusterKey()==-1 and grid.densityStatus()==DensityStatus.DENSE:
+                self.cluster_manager.addNewCluster(grid)
+
+
         #得到一个已经改变过的change_flag==1的数组
         change_grids=self.grid_list.getChangeGrids()
         #遍历这个数组，处理每一个grid的C_Vector
@@ -223,9 +229,25 @@ class D_Stream:
 
 
 
+                # 进入sporadic删除判定逻辑,处理所有grid
 
-
-
+    def judgeAndremoveSporadic(self, current_time):
+        grids=self.grid_list.getSparseGrids()
+        for grid_object in grids:
+            if SparseStatus.TODELETE == grid_object.sparseStatus():
+                if grid_object.clusterKey()!=-1:
+                    cluster=self.cluster_manager.getCluster(grid_object.clusterKey())
+                    cluster.delGrid(grid_object)
+                self.grid_list.delGrid(grid_object.key(), current_time)
+            elif SparseStatus.TEMP == grid_object.sparseStatus() or SparseStatus.NORMAL == grid_object.sparseStatus():
+                # 判断s1和s2
+                if grid_object.densityThreshold(current_time) > grid_object.densityWithTime(
+                        current_time) and current_time >= (1 + Helper().beta) * grid_object.time_remove():
+                    # 符合s1,s2 放给TODELETE
+                    grid_object.setSparseStatus(SparseStatus.TODELETE)
+                else:
+                    # 回NORMAL
+                    grid_object.setSparseStatus(SparseStatus.NORMAL)
 
 
     def do_DStream(self,rawData):
@@ -246,7 +268,7 @@ class D_Stream:
             self.__initial_clustring()
         if self.tc%self.gap == 0:
             #判断sporadic的状态并删除符合条件的grid
-            self.grid_list.judgeAndremoveSporadic(self.tc)
+            self.judgeAndremoveSporadic(self.tc)
             self.__adjust_clustring()
         #清空change为0
         self.grid_list.clearChangeFlag()

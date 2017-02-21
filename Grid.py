@@ -118,7 +118,7 @@ class Grid:
 
         #更改更新时间
         self.__time_update=time
-
+        #print("grid_key:\t",self.__key,"\tgrid_density:\t",self.__density)
     #清空数据
     #test
     def clear(self):

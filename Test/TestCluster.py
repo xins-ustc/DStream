@@ -63,7 +63,7 @@ class TestCluster(unittest.TestCase):
         self.assertEqual(cluster.size(),1)
         gird=cluster.getGrid(1)
         self.assertEqual(grid._Grid__key,1)
-
+        self.assertEqual(grid.clusterKey(),cluster.key())
 
 
 
