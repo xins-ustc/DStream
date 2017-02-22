@@ -1,5 +1,9 @@
 from Cluster import *
 from Helper import  *
+import logging
+
+
+
 #用于对类簇进行管理和操作
 class ClusterManager:
     __cluster_dic={}
@@ -10,8 +14,19 @@ class ClusterManager:
         self.__cluster_dic={}
         self.__cluster_key_index=0
 
+    def delCluster(self,cluster_key):
+
+        if not cluster_key in self.__cluster_dic:
+            raise KeyError
+        else :
+            logging.info('ClusterManager-delCluster: delete cluster key is '+str(cluster_key))
+            self.__cluster_dic.pop(cluster_key)
+
     def getCluster(self,cluster_key):
         if not cluster_key in self.__cluster_dic:
+            logging.debug("cluster_key "+str(cluster_key)+" not exist. what exist key is:")
+            for k in self.__cluster_dic:
+                logging.debug(str(k))
             raise KeyError
         else:
             return self.__cluster_dic[cluster_key]
@@ -23,6 +38,7 @@ class ClusterManager:
         cluster=Cluster(self.__cluster_key_index)
         cluster.addGrid(grid_object)
         self.__cluster_dic[self.__cluster_key_index]=cluster
+        logging.debug("ClusterManager-addNewCluster:grid "+str(grid_object.key())+" is added to a new Cluster "+str(self.__cluster_key_index))
 
     #返回某grid的neighboring的cluster数组
     #不要找自己
@@ -54,6 +70,7 @@ class ClusterManager:
         target_cluster = self.__cluster_dic[target_key]
 
         #迁移grid
+        logging.info("cluster "+str(target_key)+" is swallow by cluster "+str(source_key))
         target_grids = target_cluster.getAllGrids()
         for k in target_grids:
             grid_object=target_grids[k]
@@ -61,7 +78,7 @@ class ClusterManager:
 
         #删除cluster
         self.__cluster_dic.pop(target_key)
-
+        logging.debug("cluster " + str(target_key) + " is deleted")
     # def clearEmptyCluseter(self):
     #     keys_toremove=[]
     #     for k in self.__cluster_dic:
@@ -73,9 +90,9 @@ class ClusterManager:
 
     #切分cluster
     def splitCluster(self,cluster_key):
+
         if not cluster_key in self.__cluster_dic:
             raise Exception("ClusterManager splitCluster：cluster不存在")
-
         cluster=self.__cluster_dic[cluster_key]
         grids=cluster.getAllGrids()
 

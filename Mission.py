@@ -51,6 +51,8 @@ for raw in newarr:
 #TODO：由DStream返回多个cluser，分别将各个cluster的各个grid的数据输出到文本
 manager=dstream.cluster_manager
 clusters=manager.getAllCluster()
-
-print("cluster num:",len(clusters))
-print("grid left:",dstream.grid_list.size())
+for k in clusters:
+    cluster=clusters[k]
+    print("cluster_key is ",str(k)," cluster_size is ",cluster.size())
+# print("cluster num:",len(clusters))
+# print("grid left:",dstream.grid_list.size())

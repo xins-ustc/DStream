@@ -37,6 +37,12 @@ class RawData:
     cluster=0;
 
     def __init__(self,PW,RF,DOA):
+        # if PW<0 or PW>200:
+        #     raise ValueError
+        # if RF<0 or RF>15:
+        #     raise ValueError
+        # if DOA<0 or DOA>360:
+        #     raise ValueError
         self.DOA=DOA
         self.RF=RF
         self.PW=PW

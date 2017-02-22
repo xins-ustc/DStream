@@ -8,7 +8,12 @@ from GridList import GridList
 import math
 from Helper import *
 from Header import *
-
+import logging
+logging.basicConfig(level=logging.DEBUG,
+                format='%(asctime)s %(levelname)s %(filename)s[line:%(lineno)d]%(funcName)s  %(message)s',
+                datefmt='%a, %d %b %Y %H:%M:%S',
+                filename='myapp.log',
+                filemode='w')
 
 #主类，用于算法的处理
 class D_Stream:
@@ -46,6 +51,8 @@ class D_Stream:
         #把这个grid从cluster中移除
         cluster_object=self.cluster_manager.getCluster(grid_object.clusterKey())
         cluster_object.delGrid(grid_object)
+        if cluster_object.size()==0:
+            self.cluster_manager.delCluster(cluster_object.key())
         if not cluster_object.isClusterSingle():
             self.cluster_manager.splitCluster(cluster_object.key())
 
@@ -59,7 +66,7 @@ class D_Stream:
             grid_h_cluster_object.addGrid(grid_object)
 
         #如果g已经有cluster且他的cluseter比h大，那么吞并h的cluster，否则反向吞并
-        elif not -1==grid_object.clusterKey():
+        elif  -1!=grid_object.clusterKey():
             grid_cluster_object=self.cluster_manager.getCluster(grid_object.clusterKey())
             grid_h_cluster_object=self.cluster_manager.getCluster(grid_h_object.clusterKey())
             if grid_cluster_object.size()>grid_h_cluster_object.size():
@@ -77,11 +84,15 @@ class D_Stream:
             #把grid加到h的cluster里并判断此时h是不是outside,如果不是再把grid拿出来
             if not grid_h_cluster_object.isOutsideGrid(grid_h_object):
                 grid_h_cluster_object.delGrid(grid_object)
+                if grid_h_cluster_object.size()==0:
+                    self.cluster_manager.delCluster(grid_h_cluster_object.key())
         else:
             grid_cluster_object = self.cluster_manager.getCluster(grid_object.clusterKey())
             #grid易主
             if grid_cluster_object.size()>=grid_h_cluster_object.size():
                 grid_h_cluster_object.delGrid(grid_h_object)
+                if grid_h_cluster_object.size()==0:
+                    self.cluster_manager.delCluster(grid_h_cluster_object.key())
                 grid_cluster_object.addGrid(grid_h_object)
     #=================================================
 
@@ -142,8 +153,14 @@ class D_Stream:
                     the_ret_cluster_key=cluster.key()
         #for循环结束就能找到了,当然也可能没有
         if -1!=the_ret_cluster_key and 0!=the_ret_cluster_size:
+            if grid_object.clusterKey() != -1:
+                cluster = self.cluster_manager.getCluster(grid_object.clusterKey())
+                cluster.delGrid(grid_object)
+                if cluster.size() == 0:
+                    self.cluster_manager.delCluster(cluster.key())
             target=self.cluster_manager.getCluster(the_ret_cluster_key)
             target.addGrid(grid_object)
+
 
 #=================================================
 
@@ -173,40 +190,54 @@ class D_Stream:
                     cluster=all_clusters[k]
                 else:
                     continue
-                #找到属于outside的grid
-                outside_grids=cluster.getOutsideGrids()
-                for outside_grid in outside_grids:
-                    # 对属于outside的grid，获取它的neighboring 的grid
-                    neighbor_grids=self.grid_list.getNeighborGrids(outside_grid.key())
-                    for neighbor_grid in neighbor_grids:
-                        #若outside的grid所在cluster的尺度大于neighboring的grid，则吞并neighboring的cluster，同时change_flag++
-                        try:
-                            neighbor_cluster=self.cluster_manager.getCluster(neighbor_grid.clusterKey())
-                            if cluster.key()==neighbor_cluster.key():
-                                #如果两个key一样，则不需要执行
-                                continue
-                            if cluster.size()>neighbor_cluster.size():
-                                self.cluster_manager.mergeCluster(cluster.key(),neighbor_cluster.key())
-                                change_flag+=1
-                            else:
-                                self.cluster_manager.mergeCluster(neighbor_cluster.key(),cluster.key())
-                                change_flag+=1
-                        except KeyError:
-                            # 否则反向吞并，同时change_flag++
-                            if neighbor_grid.densityStatus() == DensityStatus.TRANSITIONAL:
-                                cluster.addGrid(neighbor_grid)
-                                change_flag += 1
+                change_flag+=self.__initial_clustering_neighbors(cluster)
 
 
             #while停止
             if 0==change_flag:
                 stop_flag=1
 
+    def __initial_clustering_neighbors(self,cluster):
+        change_flag=0
+        # 找到属于outside的grid
+        outside_grids = cluster.getOutsideGrids()
+        for outside_grid in outside_grids:
+            # 对属于outside的grid，获取它的neighboring 的grid
+            neighbor_grids = self.grid_list.getNeighborGrids(outside_grid.key())
+            for neighbor_grid in neighbor_grids:
+                # 若outside的grid所在cluster的尺度大于neighboring的grid，则吞并neighboring的cluster，同时change_flag++
+                try:
+                    # print(neighbor_grid)
+                    neighbor_cluster = self.cluster_manager.getCluster(neighbor_grid.clusterKey())
+                    if cluster.key() == neighbor_cluster.key():
+                        # 如果两个key一样，则不需要执行
+                        continue
+                    if cluster.size() > neighbor_cluster.size():
+                        self.cluster_manager.mergeCluster(cluster.key(), neighbor_cluster.key())
+                        change_flag += 1
+                        return change_flag
+                    else:
+                        self.cluster_manager.mergeCluster(neighbor_cluster.key(), cluster.key())
+
+                        change_flag += 1
+                        return change_flag
+                except KeyError:
+                    logging.debug("except KeyError")
+                    # 否则反向吞并，同时change_flag++
+                    if neighbor_grid.clusterKey() != -1:
+                        print("your program are being in trouble!!!!!")
+                        exit()
+                    if neighbor_grid.densityStatus() == DensityStatus.TRANSITIONAL:
+                        cluster.addGrid(neighbor_grid)
+                        change_flag += 1
+        return change_flag
+
     def __adjust_clustring(self):
         #=======(这一步论文里没讲清楚，自己加上去的)============把所有的dense的grid设置为单独的cluster
         dense_grids=self.grid_list.getDenseGrids()
         for grid in dense_grids:
             if grid.clusterKey()==-1 and grid.densityStatus()==DensityStatus.DENSE:
+                logging.debug("DStream-__adjust_clustering: dense grid "+grid.key()+" is of no cluster")
                 self.cluster_manager.addNewCluster(grid)
 
 
@@ -238,6 +269,8 @@ class D_Stream:
                 if grid_object.clusterKey()!=-1:
                     cluster=self.cluster_manager.getCluster(grid_object.clusterKey())
                     cluster.delGrid(grid_object)
+                    if cluster.size() == 0:
+                        self.cluster_manager.delCluster(cluster.key())
                 self.grid_list.delGrid(grid_object.key(), current_time)
             elif SparseStatus.TEMP == grid_object.sparseStatus() or SparseStatus.NORMAL == grid_object.sparseStatus():
                 # 判断s1和s2

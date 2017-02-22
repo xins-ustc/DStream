@@ -1,5 +1,5 @@
 from Helper import *
-
+import logging
 
 class Cluster:
     __grid_dic = {}
@@ -39,6 +39,7 @@ class Cluster:
         else:
             self.__grid_dic[key]=grid_object
             grid_object.setClusterKey(self.__key)
+            logging.debug("cluster "+str(self.__key)+" add grid "+str(grid_object.key()))
 
     #从cluster中删除grid(这个操作不理会grid_list)
     def delGrid(self,grid_object):

@@ -137,7 +137,7 @@ class TestClusterManager(unittest.TestCase):
             self.assertIn(grid.key(),[1,2])
         cluster3=manager.getCluster(3)
         cluster3.getGrid(3)
-
+        self.assertEqual(2,len(manager.getAllCluster()))
 
     def test_splitCluster(self):
         #TODO:检查切割是否正确

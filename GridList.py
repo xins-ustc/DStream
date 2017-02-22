@@ -1,5 +1,6 @@
 from Grid import *
 from Helper import *
+import logging
 #用于管理包含数据的Grid
 class GridList:
     __grid_list={}
@@ -80,6 +81,7 @@ class GridList:
         if not grid_key in self.__grid_list:
             raise KeyError("grid_list没有这个key,删除失败")
         else:
+            logging.debug("grid "+grid_key+"is deleted(actually this grid is clear but not removed from gridList)")
             # 删除(由于paper中提到保留tg即time_remove，所以不从grid_list中删除，而是只清空数据，并记录time_remove)
             #清空密度信息,只记录__time_remove
             grid_object=self.__grid_list[grid_key]

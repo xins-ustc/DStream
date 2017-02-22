@@ -3,19 +3,21 @@ sys.path.append("..")
 from DStream import  *
 from Helper import *
 import unittest
-
+import logging
 from HelperForTest import *
 
 
 
 class TestDStream(unittest.TestCase):
     def test_init(self):
+        logging.info("test_init")
         dstream=D_Stream()
         self.assertEqual(0,dstream.tc)
         self.assertEqual(Helper().gap(), dstream.gap)
         self.assertNotEqual(None,dstream.grid_list)
         self.assertNotEqual(None, dstream.cluster_manager)
     def test_adjust_sparse(self):
+        logging.info("test_adjust_sparse")
         #被删除的grid不存在
         dstream=D_Stream()
         grid=Grid()
@@ -58,6 +60,7 @@ class TestDStream(unittest.TestCase):
         dstream._D_Stream__adjust_sparse(g)
         self.assertEqual(2, len(manager._ClusterManager__cluster_dic))
     def test_adjust_dense_neighbor_dense(self):
+        logging.info("test_adjust_dense_neighbor_dense")
         dstream = D_Stream()
         manager=dstream.cluster_manager
         #建立一个dense grid和一个邻居gird_h，grid_h是dense且grid的cluster不存在，验证g会在h的cluster里
@@ -128,6 +131,7 @@ class TestDStream(unittest.TestCase):
             self.assertIn(grid.key(), ['1002001001', '1003001001', '1004001001', '1003002001'])
 
     def test_adjust_dense_neighbor_transitional(self):
+        logging.info("test_adjust_dense_neighbor_transitional")
         #另dense g没有cluster，且如果g加入到邻居h的cluster里，那么邻居h是一个outside，验证g在h的cluster里
         dstream = D_Stream()
         manager = dstream.cluster_manager
@@ -205,6 +209,7 @@ class TestDStream(unittest.TestCase):
 
 
     def test_adjust_dense(self):
+        logging.info("test_adjust_dense")
         #两个neighbor cluster，一大一小,其中h是dense
         dstream = D_Stream()
         grid_list=dstream.grid_list
@@ -306,6 +311,7 @@ class TestDStream(unittest.TestCase):
 
 
     def test_adjust_transitional(self):
+        logging.info("test_adjust_transitional")
         #transitional g，g没有neighbor cluster但有neighbor 验证g没变化
         dstream = D_Stream()
         g=Grid()
@@ -341,13 +347,25 @@ class TestDStream(unittest.TestCase):
 
         #有neighbor cluster，加入是outside，验证g被加入
         dstream = D_Stream()
+
+        #g
         g = Grid()
         g._Grid__densityStatus = DensityStatus.TRANSITIONAL
         g._Grid__key = '1000100100'
-        keys = Helper.getNeighborKeys(g.key())
+        cluster2 = Cluster(2)
+        cluster2.addGrid(g)
+        dstream.grid_list._GridList__grid_list[g.key()] = g
+        dstream.cluster_manager._ClusterManager__cluster_dic[2] = cluster2
+
+        #cluster1
         cluster1 = Cluster(1)
+        keys = Helper.getNeighborKeys(g.key())
         dstream.cluster_manager._ClusterManager__cluster_dic[1] = cluster1
-        dstream.cluster_manager._ClusterManager__cluster_key_index+=1
+
+        #index
+        dstream.cluster_manager._ClusterManager__cluster_key_index=2
+
+        #for
         for k in keys:
             h = Grid()
             h._Grid__key = k
@@ -355,12 +373,17 @@ class TestDStream(unittest.TestCase):
             dstream.grid_list._GridList__grid_list[k] = h
             break
 
+        #test
         dstream._D_Stream__adjust_transitional(g)
         self.assertEqual(1, g._Grid__cluster_key)
+        self.assertEqual(1,len(dstream.cluster_manager.getAllCluster()))
+
 
 
     def test_initial_clustring(self):
+        logging.info("test_initial_clustring")
         #1、布置100个不是neighbor的grid，运行函数不会报错
+        logging.debug("case1 begin")
         dstream=D_Stream()
         k='100100'
         for i in range(1,100):
@@ -374,8 +397,9 @@ class TestDStream(unittest.TestCase):
             k=int(k)+3000000
             grid=dstream.grid_list._GridList__grid_list[k]
             self.assertEqual(grid.clusterKey(),-1)
-
+        logging.debug("case1 done")
         #1-2、其中50个是dense，25个transitional，25个sparse，检查50个被分入各自cluster，但是其他50个没有cluster
+        logging.debug("case1-2 begin")
         dstream = D_Stream()
         k = '100100'
         for i in range(1, 100):
@@ -398,9 +422,10 @@ class TestDStream(unittest.TestCase):
                 self.assertNotEqual(-1,grid.clusterKey())
             else:
                 self.assertEqual(-1, grid.clusterKey())
-
+        logging.debug("case1-2  done")
 
         #2、10个互相隔离的cluster，运行函数后10个cluster没有变化
+        logging.debug("case2 begin")
         dstream = D_Stream()
         index=0
         key='100100'
@@ -424,8 +449,10 @@ class TestDStream(unittest.TestCase):
             self.assertEqual(7,cluster.size())
         self.assertEqual(10,len(clusters))
 
-
+        logging.debug("case2 done")
         #3、5个cluster，其中1和2接壤，1被2吞并，3和4接壤，4被3吞并、4的邻居有一个transitional的grid 5 ，被4吞并
+        logging.debug("case3 begin")
+
         dstream = D_Stream()
 
         g=Grid()
@@ -485,8 +512,11 @@ class TestDStream(unittest.TestCase):
 
         h=Grid()
         h._Grid__key='1002100100'
-        dstream.grid_list._GridList__grid_list[h.key()] = h
         h._Grid__densityStatus=DensityStatus.TRANSITIONAL
+        dstream.grid_list._GridList__grid_list[h.key()] = h
+
+
+        logging.debug("case3 init done and cluster_key_index is "+str(dstream.cluster_manager._ClusterManager__cluster_key_index)+" cluster num is "+str(len(dstream.cluster_manager.getAllCluster())))
 
         dstream._D_Stream__initial_clustring()
             #运行函数后，只剩下两个cluster
@@ -508,7 +538,8 @@ class TestDStream(unittest.TestCase):
         grids=cluster4.getAllGrids()
         for k in grids:
             self.assertIn(k,['1000100100','1001100100','999100100','1002100100'])
-
+        logging.debug("case3 done")
+        logging.info("test_initial_clustring is done!")
 
     # def test_do_DStream(self):
     #     #两个gap的数据量来做覆盖测试
@@ -521,7 +552,9 @@ class TestDStream(unittest.TestCase):
 
 
     def test_judgeAndremoveSporadic(self):
+        logging.info("test_judgeAndremoveSporadic")
         #case1:list中没有Sparse的grid，调用后检查各个grid的状态的remove_time，没有变化且gird的数量没有变化
+        logging.debug("case1")
         d=D_Stream()
         # gridList=GridList()
         self.assertEqual(0,len(d.grid_list._GridList__grid_list))
@@ -545,6 +578,7 @@ class TestDStream(unittest.TestCase):
                 # Sparse的数量也不变，且Sparse中TODELETE的状态全部被处理
                 # 3个3个TODELETE，3个符合s1但不符合s2的NORMAL和3个同类TEMP，3个符合s2但不符合s1的NORMAL和同类TEMP,3个符合s1和s2的TEMP，3个符合s1和s2的NORMAL
         # d.grid_list = GridList()
+        logging.debug("case2")
         d = D_Stream()
         for i in range(1, 1000):
             time += random.randint(1, 10000)
@@ -657,6 +691,7 @@ class TestDStream(unittest.TestCase):
             self.assertEqual(grid.clusterKey(),-1)
             self.assertEqual(grid._Grid__change,0)
         #case2:3-15的grid依然是NORMAL
+        logging.debug("case2-1")
         for i in range(3,15):
             key = keys[i]
             grid = d.grid_list.getGrid(key)
@@ -672,6 +707,7 @@ class TestDStream(unittest.TestCase):
             self.assertNotEqual(grid.time_remove(),time)
 
         #case3: 被判断要删除的grid，检查其不在gridlist和cluster里面
+        logging.debug("case3")
         d = D_Stream()
         #grid作为sparse和todelete，被删除且，cluster里找不到它
         raw=HelperForTest.randomLegalRawData()
