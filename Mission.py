@@ -10,7 +10,7 @@ array=[]
 time=0
 for i in range(1,1000):
     pw=random.random()*5+20
-    raw=RawData(PW=pw,RF=3,DOA=10)
+    raw=RawData(PW=30,RF=3,DOA=10)
     time=time+random.randint(1,10)
     raw.toa=time
     raw.cluster=1
@@ -19,7 +19,7 @@ for i in range(1,1000):
 time=0
 for i in range(1,10000):
     pw=random.random()*3+15
-    raw=RawData(PW=pw,RF=4,DOA=15)
+    raw=RawData(PW=10,RF=4,DOA=15)
     time=time+random.randint(1,10)
     raw.toa=time
     raw.cluster=2
@@ -28,7 +28,7 @@ for i in range(1,10000):
 time = 0
 for i in range(1, 10000):
     pw = random.random() * 3 + 15
-    raw = RawData(PW=pw, RF=5, DOA=12)
+    raw = RawData(PW=20, RF=5, DOA=12)
     time = time + random.randint(1, 10)
     raw.toa = time
     raw.cluster=3
@@ -51,8 +51,13 @@ for raw in newarr:
 #TODO：由DStream返回多个cluser，分别将各个cluster的各个grid的数据输出到文本
 manager=dstream.cluster_manager
 clusters=manager.getAllCluster()
+print("cluster num:",len(clusters))
 for k in clusters:
     cluster=clusters[k]
     print("cluster_key is ",str(k)," cluster_size is ",cluster.size())
-# print("cluster num:",len(clusters))
+    all_grids = cluster.getAllGrids()
+    for k in all_grids:
+        grid=all_grids[k]
+        raw=Helper.getRawFromKey(grid.key())
+        print("PW:",int(raw.PW)," RF:",int(raw.RF)," DOA:",int(raw.DOA))
 # print("grid left:",dstream.grid_list.size())

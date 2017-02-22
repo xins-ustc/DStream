@@ -48,6 +48,7 @@ class D_Stream:
 
 
     def __adjust_sparse(self,grid_object):
+        return
         #把这个grid从cluster中移除
         cluster_object=self.cluster_manager.getCluster(grid_object.clusterKey())
         cluster_object.delGrid(grid_object)

@@ -7,7 +7,7 @@ class Helper:
     N = 2000 * 300 * 720  # 根据三个维度的值域得到
     Cl = 0.8  # 这个是聚类参数里的常数，取值范围0~1，作者选了0.8，在这里仿照一下，后期在调整
     lamb = 0.998  # λ是聚类参数里的常数，取值范围0~1
-    Cm = 2*N*(1-lamb)  # 这个是聚类参数里的常数，取值范围>1 根据《参数密度调查得出》。其中60是达到dense的密度值要求
+    Cm = 17*N*(1-lamb)  # 这个是聚类参数里的常数，取值范围>1 根据《参数密度调查得出》。其中60是达到dense的密度值要求
     beta = 0.3 #paper中解释是用于sporadic判断的度量，
 
     Dm = Cm/(N*(1-lamb))
@@ -60,6 +60,13 @@ class Helper:
         if doa<0 or doa >360:
             raise ValueError("Helper.getKeyFromRawData:doa数据超出范围",doa)
         return str(round((pw/0.1))*1000000+round((rf/0.05))*1000+round(doa/0.5))
+
+    def getRawFromKey(key):
+        pw=(int(key)/1000000)*0.1
+        rf=((int(key)%1000000)/1000)*0.05
+        doa=(int(key)%1000)*0.5
+        return RawData(PW=pw,RF=rf,DOA=doa)
+
 
 
     def getNeighborKeys(key):

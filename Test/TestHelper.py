@@ -101,6 +101,12 @@ class TestHelper(unittest.TestCase):
         self.assertIn(str(key_int+1),neighbor_keys)
         self.assertIn(str(key_int-1),neighbor_keys)
 
-
+    def test_getRawFromKey(self):
+        raw=HelperForTest.randomLegalRawData()
+        key=Helper.getKeyFromRawData(raw)
+        raw2=Helper.getRawFromKey(key)
+        self.assertEqual(int(raw.PW),int(raw2.PW))
+        self.assertEqual(int(raw.RF),int(raw2.RF))
+        self.assertEqual(int(raw.DOA),int(raw2.DOA))
 if __name__=='__main__':
     unittest.main()
