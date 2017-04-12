@@ -1,5 +1,5 @@
 import logging
-
+import random
 import logging
 
 logging.basicConfig(level=logging.DEBUG,
@@ -11,6 +11,6 @@ logging.basicConfig(level=logging.DEBUG,
 
 
 
-# logging.debug('This is debug message'+str(1))
-a = A()
-a.a()
+for i in range(1,10):
+    pw = random.random() * 1 + 29
+    print(pw)

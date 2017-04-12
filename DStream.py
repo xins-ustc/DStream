@@ -237,7 +237,7 @@ class D_Stream:
         #=======(这一步论文里没讲清楚，自己加上去的)============把所有的dense的grid设置为单独的cluster
         dense_grids=self.grid_list.getDenseGrids()
         for grid in dense_grids:
-            if grid.clusterKey()==-1 and grid.densityStatus()==DensityStatus.DENSE:
+            if grid.isNotClustered() and grid.densityStatus()==DensityStatus.DENSE:
                 logging.debug("DStream-__adjust_clustering: dense grid "+grid.key()+" is of no cluster")
                 self.cluster_manager.addNewCluster(grid)
 

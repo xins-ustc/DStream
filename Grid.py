@@ -42,6 +42,11 @@ class Grid:
     def time_remove(self):
         return self.__time_remove
 
+    #该grid没有cluster
+    def isNotClustered(self):
+        if self.__cluster_key==-1:
+            return True
+        return False
     #test
     def isNoCluster(self):
         if -1==self.__cluster_key:

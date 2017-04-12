@@ -9,8 +9,8 @@ array=[]
 
 time=0
 for i in range(1,1000):
-    pw=random.random()*5+20
-    raw=RawData(PW=30,RF=3,DOA=10)
+    pw=random.random()*1+29
+    raw=RawData(PW=pw,RF=3,DOA=10)
     time=time+random.randint(1,10)
     raw.toa=time
     raw.cluster=1

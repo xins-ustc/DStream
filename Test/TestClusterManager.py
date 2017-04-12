@@ -46,6 +46,8 @@ class TestClusterManager(unittest.TestCase):
         self.assertEqual(1,grid1.clusterKey())
         self.assertEqual(2,grid2.clusterKey())
 
+        #若
+
 
     def test_getNeighborClusters(self):
         #将一个grid的neighbor的cluster的数组返回

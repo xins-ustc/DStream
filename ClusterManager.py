@@ -32,8 +32,10 @@ class ClusterManager:
             return self.__cluster_dic[cluster_key]
 
     #将grid加入为一个新的cluster
-    #该函数不检查其他cluster是否已经有该grid
     def addNewCluster(self,grid_object):
+        if(not grid_object.isNotClustered()):
+            raise Exception("this grid is being clustering")
+
         self.__cluster_key_index+=1
         cluster=Cluster(self.__cluster_key_index)
         cluster.addGrid(grid_object)
