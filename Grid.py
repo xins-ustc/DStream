@@ -4,7 +4,7 @@ from Helper import *
 from HelperForTest import *
 
 import unittest
-
+import logging
 #Characteristic Vector 保存每个grid的信息
 class Grid:
     #"the last time when g is update" 即grid最近更新的时间点
@@ -103,8 +103,8 @@ class Grid:
         if time<=self.__time_update:
             raise ValueError("addData:time cannot less then time_update")
 
-        if not 0==self.__key:
-            if not Helper.getKeyFromRawData(rawData)==self.__key:
+        if 0!=self.__key:
+            if Helper.getKeyFromRawData(rawData)!=self.__key:
                 raise ValueError
         #设置key
         self.__key=Helper.getKeyFromRawData(rawData)
@@ -115,6 +115,7 @@ class Grid:
         #判断密度变更与否和标记change
         if not Helper().getDensityStatus(self.__density)==self.__densityStatus:
             self.__change=1
+            logging.debug("grid "+self.key()+" densityStatu change from "+str(self.__densityStatus)+" to "+str(Helper().getDensityStatus(self.__density)))
             self.__densityStatus=Helper().getDensityStatus(self.__density)
 
         #若处于TODELETE状态，转为TEMP

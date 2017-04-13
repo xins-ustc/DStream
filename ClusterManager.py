@@ -19,7 +19,7 @@ class ClusterManager:
         if not cluster_key in self.__cluster_dic:
             raise KeyError
         else :
-            logging.info('ClusterManager-delCluster: delete cluster key is '+str(cluster_key))
+            logging.info('delete cluster '+str(cluster_key))
             self.__cluster_dic.pop(cluster_key)
 
     def getCluster(self,cluster_key):
@@ -38,9 +38,10 @@ class ClusterManager:
 
         self.__cluster_key_index+=1
         cluster=Cluster(self.__cluster_key_index)
+        logging.debug("created new Cluster " + str(self.__cluster_key_index))
         cluster.addGrid(grid_object)
         self.__cluster_dic[self.__cluster_key_index]=cluster
-        logging.debug("ClusterManager-addNewCluster:grid "+str(grid_object.key())+" is added to a new Cluster "+str(self.__cluster_key_index))
+
 
     #返回某grid的neighboring的cluster数组
     #不要找自己
@@ -102,6 +103,7 @@ class ClusterManager:
         for k in grids:
             g=grids[k]
             keys.append(g.key())
+
        #！！！这里的处理流程和isSingle重复了，但是为了保证函数的不变，只能复制一遍
         stop = 0
         # 初始化flag_dic
@@ -136,10 +138,10 @@ class ClusterManager:
             stop = 1
             for k in flag_dic:
                 item = flag_dic[k]
-                if not 0 == item:
+                if 0 != item:
                     stop = 0
         # 循环结束后，判断flag_dic的长度，若为0，则是single
-        if not 0 == len(flag_dic):
+        if 0 != len(flag_dic):
             #这部分就是被分割的部分
             #将这些grid移动到新的cluster中
             self.__cluster_key_index+=1

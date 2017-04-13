@@ -46,8 +46,10 @@ class Cluster:
         if not grid_object.key() in self.__grid_dic:
             raise KeyError("Cluster delGrid:这个Cluster中不存在这个grid")
         else:
+
             grid_object.setClusterKey(-1)
             self.__grid_dic.pop(grid_object.key())
+        logging.debug("grid " + grid_object.key() + "has been removed from cluster"+str(self.__key))
 
 
     #判断某grid是否为该cluster的outside_grid

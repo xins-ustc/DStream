@@ -39,6 +39,7 @@ class GridList:
 
     #传入一个RawData类型的数据,然后将它放入对应Grid中并更新Grid的状态
     def addNewData(self,rawData,time):
+        logging.debug("Pw:" + str(rawData.PW) + " RF:" + str(rawData.RF) + " DOA:" + str(rawData.DOA)+" time:"+str(time))
         key=Helper().getKeyFromRawData(rawData)
         if not key in self.__grid_list:
             grid_object=Grid()

@@ -5,6 +5,16 @@ from DStream import *
 dstream=D_Stream()
 #生成三组数据
 
+print("N:",Helper.N)
+print("Cl:",Helper.Cl)
+print("lambda:",Helper.lamb)
+print("Cm:",Helper.Cm)
+print("beta:",Helper.beta)
+print("Dm:",Helper.Dm)
+print("Dl:",Helper.Dl)
+print("gap:",Helper().gap())
+
+
 array=[]
 
 time=0
@@ -56,8 +66,9 @@ for k in clusters:
     cluster=clusters[k]
     print("cluster_key is ",str(k)," cluster_size is ",cluster.size())
     all_grids = cluster.getAllGrids()
-    for k in all_grids:
-        grid=all_grids[k]
+    for i in all_grids:
+        grid=all_grids[i]
         raw=Helper.getRawFromKey(grid.key())
-        print("PW:",int(raw.PW)," RF:",int(raw.RF)," DOA:",int(raw.DOA))
+        print("key is ",grid.key())
+        # print("PW:",raw.PW," RF:",raw.RF," DOA:",raw.DOA)
 # print("grid left:",dstream.grid_list.size())
